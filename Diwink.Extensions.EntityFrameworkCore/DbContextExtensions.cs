@@ -40,6 +40,8 @@ namespace Diwink.Extensions.EntityFrameworkCore
                     var x2 = navigationEntry.Metadata.ForeignKey.DependentToPrincipal;
                     var x3 = navigationEntry.Metadata.IsShadowProperty();
                     var x4 = navigationEntry.Metadata.DeclaringEntityType;
+                    var x5 = navigationEntry.Metadata.FindInverse();
+                    var x6 = existingEntry.Metadata.DefiningNavigationName == x5?.Name;
 
                     var passedNavigationObject = existingEntry.Entity.GetType().GetProperty(navigationEntry.Metadata.Name)?.GetValue(newEntity);
 
