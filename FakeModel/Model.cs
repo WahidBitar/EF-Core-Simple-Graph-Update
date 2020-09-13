@@ -9,8 +9,18 @@ namespace FakeModel
         public int Id { get; set; }
         public string Name { get; set; }
         public SchoolType Type { get; set; }
+        public SchoolHouse House { get; set; }
         public ICollection<string> Address { get; set; } = new HashSet<string>();
         public ICollection<Class> Classes { get; set; } = new HashSet<Class>();
+    }
+
+
+
+    public class SchoolHouse
+    {
+        public int SchoolId { get; set; }
+        public int Capacity { get; set; }
+        public School School { get; set; }
     }
 
 

@@ -16,6 +16,7 @@ namespace UnitTests
 
 
         public DbSet<School> Schools { get; set; }
+        public DbSet<SchoolHouse> SchoolHouses { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<ClassLaboratory> ClassLaboratories { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
@@ -27,6 +28,7 @@ namespace UnitTests
             base.OnModelCreating(builder);
 
             builder.Entity<School>(configureSchool);
+            builder.Entity<SchoolHouse>(configureSchoolHouses);
             builder.Entity<Class>(configureClass);
             builder.Entity<ClassLaboratory>(configureClassLaboratory);
             builder.Entity<Teacher>(configureTeacher);
@@ -41,6 +43,17 @@ namespace UnitTests
                     v => string.Join(";", v.Select(r => r)),
                     y => y.Split(';', StringSplitOptions.RemoveEmptyEntries))
                 .HasMaxLength(200);
+
+            builder.HasOne(x => x.House)
+                .WithOne(x => x.School)
+                .HasForeignKey<SchoolHouse>(x => x.SchoolId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+
+        private void configureSchoolHouses(EntityTypeBuilder<SchoolHouse> builder)
+        {
+            builder.HasKey(x => x.SchoolId);
         }
 
 

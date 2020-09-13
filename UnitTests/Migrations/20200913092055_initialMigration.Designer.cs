@@ -10,7 +10,7 @@ using UnitTests;
 namespace UnitTests.Migrations
 {
     [DbContext(typeof(FakeSchoolsDbContext))]
-    [Migration("20200910123829_initialMigration")]
+    [Migration("20200913092055_initialMigration")]
     partial class initialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -94,6 +94,19 @@ namespace UnitTests.Migrations
                     b.ToTable("Schools");
                 });
 
+            modelBuilder.Entity("FakeModel.SchoolHouse", b =>
+                {
+                    b.Property<int>("SchoolId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.HasKey("SchoolId");
+
+                    b.ToTable("SchoolHouses");
+                });
+
             modelBuilder.Entity("FakeModel.Student", b =>
                 {
                     b.Property<Guid>("Id")
@@ -162,6 +175,15 @@ namespace UnitTests.Migrations
                     b.HasOne("FakeModel.Teacher", "Teacher")
                         .WithMany("ClassTeachers")
                         .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FakeModel.SchoolHouse", b =>
+                {
+                    b.HasOne("FakeModel.School", "School")
+                        .WithOne("House")
+                        .HasForeignKey("FakeModel.SchoolHouse", "SchoolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

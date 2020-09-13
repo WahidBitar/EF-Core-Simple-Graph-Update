@@ -57,6 +57,24 @@ namespace UnitTests.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SchoolHouses",
+                columns: table => new
+                {
+                    SchoolId = table.Column<int>(nullable: false),
+                    Capacity = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SchoolHouses", x => x.SchoolId);
+                    table.ForeignKey(
+                        name: "FK_SchoolHouses_Schools_SchoolId",
+                        column: x => x.SchoolId,
+                        principalTable: "Schools",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ClassLaboratories",
                 columns: table => new
                 {
@@ -141,6 +159,9 @@ namespace UnitTests.Migrations
 
             migrationBuilder.DropTable(
                 name: "ClassTeacher");
+
+            migrationBuilder.DropTable(
+                name: "SchoolHouses");
 
             migrationBuilder.DropTable(
                 name: "Students");

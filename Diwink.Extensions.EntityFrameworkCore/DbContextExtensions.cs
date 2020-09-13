@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -22,31 +20,28 @@ namespace Diwink.Extensions.EntityFrameworkCore
 
         public static void InsertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity) where T : class
         {
-            if (newEntity == null)
-                throw new ArgumentNullException(nameof(newEntity), "The new value cannot be null");
+            insertUpdateOrDeleteGraph(context, newEntity, existingEntity, null);
+        }
 
+
+        private static void insertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity, string aggregateType) where T : class
+        {
             if (existingEntity == null)
             {
                 context.Add(newEntity);
+            }
+            else if (newEntity == null)
+            {
+                context.Remove(existingEntity);
             }
             else
             {
                 var existingEntry = context.Entry(existingEntity);
                 existingEntry.CurrentValues.SetValues(newEntity);
 
-                foreach (var navigationEntry in existingEntry.Navigations.Where(n => n.IsLoaded))
+                foreach (var navigationEntry in existingEntry.Navigations.Where(n => n.IsLoaded && n.Metadata.ClrType.FullName != aggregateType))
                 {
-                    var x1 = navigationEntry.Metadata.IsDependentToPrincipal();
-                    var x2 = navigationEntry.Metadata.ForeignKey.DependentToPrincipal;
-                    var x3 = navigationEntry.Metadata.IsShadowProperty();
-                    var x4 = navigationEntry.Metadata.DeclaringEntityType;
-                    var x5 = navigationEntry.Metadata.FindInverse();
-                    var x6 = existingEntry.Metadata.DefiningNavigationName == x5?.Name;
-
                     var passedNavigationObject = existingEntry.Entity.GetType().GetProperty(navigationEntry.Metadata.Name)?.GetValue(newEntity);
-
-                    if (passedNavigationObject == null)
-                        continue;
 
                     if (navigationEntry.Metadata.IsCollection())
                     {
@@ -75,7 +70,7 @@ namespace Diwink.Extensions.EntityFrameworkCore
                             }
 
                             //Update sub navigation
-                            InsertUpdateOrDeleteGraph(context, newValue, existingValue);
+                            insertUpdateOrDeleteGraph(context, newValue, existingValue, existingEntry.Metadata.ClrType.FullName);
                         }
 
                         foreach (var existingValue in existingNavigationObjectList.ToList())
@@ -91,7 +86,7 @@ namespace Diwink.Extensions.EntityFrameworkCore
                     else
                     {
                         // the navigation is not a list
-                        InsertUpdateOrDeleteGraph(context, passedNavigationObject, navigationEntry.CurrentValue);
+                        insertUpdateOrDeleteGraph(context, passedNavigationObject, navigationEntry.CurrentValue, existingEntry.Metadata.ClrType.FullName);
                     }
                 }
             }
