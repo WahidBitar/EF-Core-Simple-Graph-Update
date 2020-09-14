@@ -12,6 +12,9 @@
     <PackageTags>EntityFrameworkCore</PackageTags>
     <PackageReleaseNotes>Simple method to do Graph Update for the loaded entities in any aggregate entity</PackageReleaseNotes>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
