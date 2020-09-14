@@ -18,10 +18,9 @@ namespace UnitTests
         private FakeSchoolsDbContext dbContext;
         private readonly ServiceProvider serviceProvider;
         private IServiceScope scope;
+        private bool inMemoryDb;
         private School school;
         private List<Teacher> teachers;
-        private ICollection<Class> classes;
-        private List<Student> students;
 
 
         public GraphUpdateTests()
@@ -29,16 +28,23 @@ namespace UnitTests
             var configuration = TestHelpers.InitConfiguration();
             var services = new ServiceCollection();
 
-            services.AddDbContext<FakeSchoolsDbContext>(options => options
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging() 
-                .UseSqlServer(configuration.GetConnectionString("FakeSchoolsDb"))
-                /*.UseInMemoryDatabase("FakeSchoolsDb")*/);
+            services.AddDbContext<FakeSchoolsDbContext>(options =>
+                {
+                    options.EnableDetailedErrors().EnableSensitiveDataLogging();
+                    inMemoryDb = bool.Parse(configuration["InMemoryDB"]);
+                    if (inMemoryDb)
+                        options.UseInMemoryDatabase("FakeSchoolsDb");
+                    else
+                        options.UseSqlServer(configuration.GetConnectionString("FakeSchoolsDb"));
+                }
+            );
 
             serviceProvider = services.BuildServiceProvider();
         }
 
-
+        /// <summary>
+        /// Setup operation will create a new DbContext for each test method
+        /// </summary>
         [SetUp]
         public void Setup()
         {
@@ -56,7 +62,7 @@ namespace UnitTests
                     DateOfBirth = new DateTimeOffset(1980, 9, 1, 03, 0, 0, 0, TimeSpan.Zero),
                 }
             };
-            students = new List<Student>
+            var students = new List<Student>
             {
                 new Student
                 {
@@ -71,7 +77,7 @@ namespace UnitTests
                     DateOfBirth = DateTimeOffset.Now.AddYears(-6).Date
                 },
             };
-            classes = new List<Class>
+            var classes = new List<Class>
             {
                 new Class
                 {
@@ -114,6 +120,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Disposing the scope and DbContext
+        /// </summary>
         [TearDown]
         public void TearDown()
         {
@@ -121,6 +130,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Clean up everything
+        /// </summary>
         [Test]
         public void S000_Delete_Database()
         {
@@ -128,21 +140,37 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Apply DB migrations if the test happens on real database
+        /// </summary>
         [Test]
         public void S001_Apply_Migrations()
         {
-            dbContext.Database.Migrate();
+            if (!inMemoryDb)
+                dbContext.Database.Migrate();
         }
 
 
+        /// <summary>
+        /// Test insert new simple entities
+        /// </summary>
         [Test]
         public void S002_Seed_Teachers()
         {
-            dbContext.Teachers.AddRange(teachers);
+            foreach (var teacher in teachers)
+            {
+                dbContext.InsertUpdateOrDeleteGraph(teacher, null);
+            }
+
             dbContext.SaveChanges();
+
+            Assert.AreEqual(teachers.Count, dbContext.Teachers.Count());
         }
 
 
+        /// <summary>
+        /// Test insert more complex Entity
+        /// </summary>
         [Test]
         public void S003_Add_The_School()
         {
@@ -161,8 +189,11 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update an Aggregate by inserting one-to-one navigation property
+        /// </summary>
         [Test]
-        public void S004_Add_House_To_The_School()
+        public void S004_Add_House_To_The_School_Should_Update_House_Navigation_Property()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
             {
@@ -201,6 +232,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update one-to-one navigation property in an Aggregate
+        /// </summary>
         [Test]
         public void S005_Update_The_House_Of_The_School()
         {
@@ -242,8 +276,11 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update an Aggregate by deleting one-to-one navigation property
+        /// </summary>
         [Test]
-        public void S006_Remove_The_House_From_The_School()
+        public void S006_Remove_The_House_From_The_School_Should_Make_The_House_Navigation_Null()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
             {
@@ -278,6 +315,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update an inner Entity in the Aggregate should not affect the other sub Entities as they're not included in the changes
+        /// </summary>
         [Test]
         public void S007_Update_Classes_Info_Should_Not_Change_Teachers()
         {
@@ -375,6 +415,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update Many-to-Many relation in an Aggregate by adding relation to two existing entities
+        /// </summary>
         [Test]
         public void S008_Update_Classes_Info_And_Add_Teachers_To_One_Of_Them()
         {
@@ -473,6 +516,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update Many-to-Many relation in an Aggregate by removing the relation from one existing entity
+        /// </summary>
         [Test]
         public void S009_Update_First_Class_Teachers()
         {
@@ -564,6 +610,9 @@ namespace UnitTests
         }
 
 
+        /// <summary>
+        /// Update One-to-Many relation in an Aggregate
+        /// </summary>
         [Test]
         public void S010_Update_Classes_Students()
         {
@@ -643,7 +692,9 @@ namespace UnitTests
         }
 
 
-
+        /// <summary>
+        /// Insert new simple Aggregate
+        /// </summary>
         [Test]
         public void S011_Add_Degrees()
         {
@@ -670,7 +721,9 @@ namespace UnitTests
         }
 
 
-
+        /// <summary>
+        /// Update Aggregate with one-to-many relation to an Entity in another Aggregate
+        /// </summary>
         [Test]
         public void S012_Add_Degrees_To_Students_Should_Update_The_Degree_Property_In_Students()
         {
@@ -765,7 +818,9 @@ namespace UnitTests
         }
 
 
-
+        /// <summary>
+        /// Update Entity with Optional one-to-many relation to an Entity in another Aggregate
+        /// </summary>
         [Test]
         public void S013_Remove_Student_From_Degree_Should_NOT_Delete_The_Student_Entity()
         {
