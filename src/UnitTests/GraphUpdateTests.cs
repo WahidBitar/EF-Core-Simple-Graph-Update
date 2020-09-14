@@ -31,8 +31,9 @@ namespace UnitTests
 
             services.AddDbContext<FakeSchoolsDbContext>(options => options
                 .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
-                .UseSqlServer(configuration.GetConnectionString("FakeSchoolsDb")));
+                .EnableSensitiveDataLogging() /*
+                .UseSqlServer(configuration.GetConnectionString("FakeSchoolsDb"))*/
+                .UseInMemoryDatabase("FakeSchoolsDb"));
 
             serviceProvider = services.BuildServiceProvider();
         }
@@ -130,7 +131,7 @@ namespace UnitTests
         [Test]
         public void S001_Apply_Migrations()
         {
-            dbContext.Database.Migrate();
+            //dbContext.Database.Migrate();
         }
 
 
@@ -148,6 +149,15 @@ namespace UnitTests
             var dbSchool = dbContext.Schools.FirstOrDefault();
             dbContext.InsertUpdateOrDeleteGraph(school, dbSchool);
             dbContext.SaveChanges();
+
+            var updatedDbSchool = dbContext.Schools
+                .Include(s => s.Classes)
+                .ThenInclude(x => x.Students)
+                .FirstOrDefault();
+
+            Assert.IsNotNull(updatedDbSchool);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 1).Students.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).Students.Count);
         }
 
 

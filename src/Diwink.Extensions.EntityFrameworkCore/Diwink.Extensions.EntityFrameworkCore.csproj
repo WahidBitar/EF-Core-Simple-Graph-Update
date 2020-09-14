@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Wahid Bitar</Authors>
+    <Company>Digital Wink</Company>
+    <Product>Diwink.Extensions</Product>
+    <Description>Helpers extentions for Entity Framework Core</Description>
+    <PackageProjectUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>EntityFrameworkCore</PackageTags>
+    <PackageReleaseNotes>Simple method to do Graph Update for the loaded entities in any aggregate entity</PackageReleaseNotes>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+  </ItemGroup>
+
+</Project>
