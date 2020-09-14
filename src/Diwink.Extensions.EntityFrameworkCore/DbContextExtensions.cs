@@ -9,6 +9,11 @@ namespace Diwink.Extensions.EntityFrameworkCore
 {
     public static class DbContextExtensions
     {
+        /// <summary>
+        /// Get list of objects that represents the Primary Key of an entity
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns></returns>
         public static object[] GetPrimaryKeyValues(this EntityEntry entry)
         {
             return entry.Metadata.FindPrimaryKey()
@@ -17,7 +22,15 @@ namespace Diwink.Extensions.EntityFrameworkCore
                 .ToArray();
         }
 
-
+        /// <summary>
+        /// simple update method that will help you to do a full update to an aggregate graph with all related entities in it.
+        /// the update method will take the loaded aggregate entity from the DB and the passed one that may come from the API layer.
+        /// the method will update just the eager loaded entities in the aggregate "The included entities"
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="newEntity">The De-Attached Entity</param>
+        /// <param name="existingEntity">The Attached BD Entity</param>
         public static void InsertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity) where T : class
         {
             insertUpdateOrDeleteGraph(context, newEntity, existingEntity, null);
