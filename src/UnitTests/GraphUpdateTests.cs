@@ -31,9 +31,9 @@ namespace UnitTests
 
             services.AddDbContext<FakeSchoolsDbContext>(options => options
                 .EnableDetailedErrors()
-                .EnableSensitiveDataLogging() /*
-                .UseSqlServer(configuration.GetConnectionString("FakeSchoolsDb"))*/
-                .UseInMemoryDatabase("FakeSchoolsDb"));
+                .EnableSensitiveDataLogging() 
+                .UseSqlServer(configuration.GetConnectionString("FakeSchoolsDb"))
+                /*.UseInMemoryDatabase("FakeSchoolsDb")*/);
 
             serviceProvider = services.BuildServiceProvider();
         }
@@ -131,7 +131,7 @@ namespace UnitTests
         [Test]
         public void S001_Apply_Migrations()
         {
-            //dbContext.Database.Migrate();
+            dbContext.Database.Migrate();
         }
 
 
@@ -582,12 +582,6 @@ namespace UnitTests
                           'SchoolId': 1,
                           'Level': 1,
                           'Capacity': 20,
-                          'ClassTeachers': [
-                            {
-                              'ClassId': 1,
-                              'TeacherId': 'ec13122e-3ec5-4698-b254-e660d01f37ca'
-                            }
-                          ],
                           'Students': [
                             {
                               'Id': '836fe019-6cec-4f54-a39f-74448d6d86dc',
@@ -602,7 +596,6 @@ namespace UnitTests
                           'SchoolId': 1,
                           'Level': 2,
                           'Capacity': 10,
-                          'ClassTeachers': [],
                           'Students': [
                             {
                               'Id': '587ff49b-0306-448e-80fd-071c46f0b488',
@@ -645,13 +638,196 @@ namespace UnitTests
                 Formatting = Formatting.Indented,
             }));
 
-            Assert.AreEqual(1, updatedDbSchool.Classes.First(c => c.Id == 1).Students.Count());
-            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).Students.Count());
+            Assert.AreEqual(1, updatedDbSchool.Classes.First(c => c.Id == 1).Students.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).Students.Count);
+        }
+
+
+
+        [Test]
+        public void S011_Add_Degrees()
+        {
+            var highschool = new Degree()
+            {
+                Name = "High-School"
+            };
+
+            dbContext.InsertUpdateOrDeleteGraph(highschool, null);
+
+            dbContext.SaveChanges();
+
+            var updatedDbDegree = dbContext.Degrees
+                .Include(s => s.Students)
+                .FirstOrDefault();
+
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbDegree, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+
+            Assert.IsNotNull(updatedDbDegree);
+        }
+
+
+
+        [Test]
+        public void S012_Add_Degrees_To_Students_Should_Update_The_Degree_Property_In_Students()
+        {
+            var updatedSchool = JsonConvert.DeserializeObject<School>(@"
+                    {
+                      'Id': 1,
+                      'Name': 'The First',
+                      'Type': 1,
+                      'Address': [
+                        'Akdeniz',
+                        'Mersin'
+                      ],
+                      'Classes': [
+                        {
+                          'Id': 1,
+                          'SchoolId': 1,
+                          'Level': 1,
+                          'Capacity': 20,
+                          'Students': [
+                            {
+                              'Id': '836fe019-6cec-4f54-a39f-74448d6d86dc',
+                              'ClassId': 1,
+                              'DegreeId': 1,
+                              'Name': 'Samir Matin',
+                              'DateOfBirth': '2014-09-10T00:00:00+03:00'
+                            }
+                          ]
+                        },
+                        {
+                          'Id': 2,
+                          'SchoolId': 1,
+                          'Level': 2,
+                          'Capacity': 10,
+                          'Students': [
+                            {
+                              'Id': '587ff49b-0306-448e-80fd-071c46f0b488',
+                              'ClassId': 2,
+                              'DegreeId': 1,
+                              'Name': 'Bakri',
+                              'DateOfBirth': '2013-09-10T00:00:00+03:00'
+                            },	
+                            {
+                              'Id': 'ef592b57-5691-415a-974e-d281b368545f',
+                              'ClassId': 2,
+                              'DegreeId': 1,
+                              'Name': 'Saaid',
+                              'DateOfBirth': '2013-09-10T00:00:00+03:00'
+                            }
+                          ]
+                        }
+                      ]
+                    }
+");
+
+            var dbSchool = dbContext.Schools
+                .Include(s => s.Classes)
+                .ThenInclude(s => s.Students)
+                .FirstOrDefault();
+
+            dbContext.InsertUpdateOrDeleteGraph(updatedSchool, dbSchool);
+
+            dbContext.SaveChanges();
+
+            var updatedDbSchool = dbContext.Schools
+                .Include(s => s.Classes)
+                .ThenInclude(x => x.Students)
+                .ThenInclude(s => s.Degree)
+                .FirstOrDefault();
+
+            var updatedDbDegree = dbContext.Degrees
+                .Include(s => s.Students)
+                .FirstOrDefault();
+
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbSchool, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+            Console.WriteLine("---------------------------------------");
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbDegree, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+
+            Assert.AreEqual(1, updatedDbSchool.Classes.First(c => c.Id == 1).Students.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).Students.Count);
+            Assert.AreEqual(3, updatedDbDegree.Students.Count);
+            Assert.NotNull(updatedDbSchool.Classes.First(c => c.Id == 1).Students.First(s => s.Id == Guid.Parse("836fe019-6cec-4f54-a39f-74448d6d86dc")).Degree);
+            Assert.NotNull(updatedDbSchool.Classes.First(c => c.Id == 2).Students.First(s => s.Id == Guid.Parse("587ff49b-0306-448e-80fd-071c46f0b488")).Degree);
+            Assert.NotNull(updatedDbSchool.Classes.First(c => c.Id == 2).Students.First(s => s.Id == Guid.Parse("ef592b57-5691-415a-974e-d281b368545f")).Degree);
+        }
+
+
+
+        [Test]
+        public void S013_Remove_Student_From_Degree_Should_NOT_Delete_The_Student_Entity()
+        {
+            var updatedDegree = JsonConvert.DeserializeObject<Degree>(@"
+                                    {
+                                      'Id': 1,
+                                      'Name': 'High-School',
+                                      'Students': [
+                                        {
+                                          'Id': '836fe019-6cec-4f54-a39f-74448d6d86dc',
+                                          'DegreeId': 1,
+                                          'ClassId': 1,
+                                          'Name': 'Samir Matin',
+                                          'DateOfBirth': '2014-09-10T00:00:00+03:00'
+                                        },
+                                        {
+                                          'Id': '587ff49b-0306-448e-80fd-071c46f0b488',
+                                          'DegreeId': 1,
+                                          'ClassId': 2,
+                                          'Name': 'Bakri',
+                                          'DateOfBirth': '2013-09-10T00:00:00+03:00'
+                                        }
+                                      ]
+                                    }");
+
+            var dbDegree = dbContext.Degrees
+                .Include(x => x.Students)
+                .FirstOrDefault();
+
+            dbContext.InsertUpdateOrDeleteGraph(updatedDegree, dbDegree);
+
+            dbContext.SaveChanges();
+
+            var updatedDbDegree = dbContext.Degrees
+                .Include(s => s.Students)
+                .FirstOrDefault();
+
+            var updatedDbStudent = dbContext.Students
+                .Include(s => s.Degree)
+                .FirstOrDefault(x => x.Id == Guid.Parse("ef592b57-5691-415a-974e-d281b368545f"));
+
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbDegree, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+            Console.WriteLine("------------------------------------");
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbStudent, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+
+            Assert.AreEqual(2, updatedDegree.Students.Count);
+            Assert.IsNotNull(updatedDbStudent);
+            Assert.IsNull(updatedDbStudent.Degree);
+            Assert.IsNull(updatedDbStudent.DegreeId);
         }
 
 
         [Test]
-        public void S011_Add_Classes_Laboratory()
+        public void S014_Add_Classes_Laboratory()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
                     {
@@ -716,7 +892,7 @@ namespace UnitTests
 
 
         [Test]
-        public void S012_Delete_First_Class_Laboratory()
+        public void S015_Delete_First_Class_Laboratory()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
                     {
@@ -812,9 +988,8 @@ namespace UnitTests
         }
 
 
-
         [Test]
-        public void S013_Update_Class_Teachers_Of_Second_Class()
+        public void S016_Update_Class_Teachers_Of_Second_Class()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
                     {
@@ -878,14 +1053,14 @@ namespace UnitTests
                 Formatting = Formatting.Indented,
             }));
 
-            Assert.AreEqual(1, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count());
-            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count());
+            Assert.AreEqual(1, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count);
         }
 
 
 
         [Test]
-        public void S014_Add_New_Teacher_To_A_Class()
+        public void S017_Add_New_Teacher_To_A_Class()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
                     {
@@ -957,13 +1132,13 @@ namespace UnitTests
                 Formatting = Formatting.Indented,
             }));
 
-            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count());
-            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count());
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count);
         }
 
 
         [Test]
-        public void S015_Update_Teacher_Info_Through_The_Class()
+        public void S018_Update_Teacher_Info_Through_The_Class()
         {
             var updatedSchool = JsonConvert.DeserializeObject<School>(@"
                     {
@@ -1052,8 +1227,8 @@ namespace UnitTests
                 Formatting = Formatting.Indented,
             }));
 
-            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count());
-            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count());
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count);
 
             Assert.AreEqual("Ahmad Osta", updatedDbSchool
                 .Classes.First(c => c.Id == 2)
@@ -1068,7 +1243,7 @@ namespace UnitTests
 
 
         [Test]
-        public void S016_Update_Teacher_Info_Directly()
+        public void S019_Update_Teacher_Info_Directly()
         {
             var updatedTeacher = JsonConvert.DeserializeObject<Teacher>(@"
                  {
@@ -1095,6 +1270,91 @@ namespace UnitTests
 
             Assert.AreEqual("Ahmad Bey", updatedDbTeacher.Name);
             Assert.AreEqual(DateTimeOffset.Parse("1980-11-01 03:00:00.0000000 +00:00"), updatedDbTeacher.DateOfBirth);
+        }
+
+
+        [Test]
+        public void S020_Remove_Teacher_From_Class_Should_Not_Delete_The_Teacher()
+        {
+            var updatedSchool = JsonConvert.DeserializeObject<School>(@"
+                    {
+                      'Id': 1,
+                      'Name': 'The First',
+                      'Type': 1,
+                      'Address': [
+                        'Akdeniz',
+                        'Mersin'
+                      ],
+                      'Classes': [
+                        {
+                          'Id': 1,
+                          'SchoolId': 1,
+                          'Level': 1,
+                          'Capacity': 20,
+                          'ClassTeachers': [
+                            {
+                              'ClassId': 1,
+                              'TeacherId': 'ec13122e-3ec5-4698-b254-e660d01f37ca'
+                            }
+                          ]
+                        },
+                        {
+                          'Id': 2,
+                          'SchoolId': 1,
+                          'Level': 2,
+                          'Capacity': 10,
+                          'ClassTeachers': [
+                            {
+                              'ClassId': 2,
+                              'TeacherId': 'ec13122e-3ec5-4698-b254-e660d01f37ca'
+                            },
+                            {
+                              'ClassId': 2,
+                              'TeacherId': '7AB15219-5FFA-406C-B092-94636B413E05'
+                            }
+                          ]
+                        }
+                      ]
+                    }
+");
+
+            var dbSchool = dbContext.Schools
+                .Include(s => s.Classes)
+                .ThenInclude(s => s.ClassTeachers)
+                .FirstOrDefault();
+
+            dbContext.InsertUpdateOrDeleteGraph(updatedSchool, dbSchool);
+
+            dbContext.SaveChanges();
+
+            var updatedDbSchool = dbContext.Schools
+                .Include(s => s.Classes)
+                .ThenInclude(s => s.ClassTeachers)
+                .FirstOrDefault();
+
+            var updatedDbTeacher = dbContext.Teachers
+                .Include(s => s.ClassTeachers)
+                .ThenInclude(s => s.Class)
+                .FirstOrDefault(t => t.Id == Guid.Parse("D814E2DE-D097-40AE-BCCF-C4C5F1415D6B"));
+
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbSchool, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+            
+            Console.WriteLine("-------------------------------------");
+
+            Console.WriteLine(JsonConvert.SerializeObject(updatedDbTeacher, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+            }));
+
+            Assert.AreEqual(1, updatedDbSchool.Classes.First(c => c.Id == 1).ClassTeachers.Count);
+            Assert.AreEqual(2, updatedDbSchool.Classes.First(c => c.Id == 2).ClassTeachers.Count);
+            Assert.IsNotNull(updatedDbTeacher);
+            Assert.AreEqual(0, updatedDbTeacher.ClassTeachers.Count);
         }
     }
 }

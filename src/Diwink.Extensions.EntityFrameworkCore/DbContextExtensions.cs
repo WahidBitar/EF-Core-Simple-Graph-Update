@@ -64,35 +64,37 @@ namespace Diwink.Extensions.EntityFrameworkCore
 
                         if (!(passedNavigationObject is IEnumerable<object> passedNavigationObjectEnumerable))
                             throw new NullReferenceException($"Couldn't iterate through the passed Navigation list of '{navigationEntry.Metadata.Name}'");
-
-                        var existingNavigationObjectList = existingNavigationObject;
-                        var passedNavigationObjectList = passedNavigationObjectEnumerable;
-
-                        foreach (var newValue in passedNavigationObjectList)
+                        
+                        foreach (var newValue in passedNavigationObjectEnumerable)
                         {
                             var newId = context.Entry(newValue).GetPrimaryKeyValues();
-                            var existingValue = existingNavigationObjectList.FirstOrDefault(v => context.Entry(v).GetPrimaryKeyValues().SequenceEqual(newId));
+                            var existingValue = existingNavigationObject.FirstOrDefault(v => context.Entry(v).GetPrimaryKeyValues().SequenceEqual(newId));
                             if (existingValue == null)
                             {
-                                var addMethod = existingNavigationObjectList.GetType().GetMethod("Add");
+                                var addMethod = existingNavigationObject.GetType().GetMethod("Add");
 
                                 if (addMethod == null)
                                     throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have an 'Add' method.");
 
-                                addMethod.Invoke(existingNavigationObjectList, new[] {newValue});
+                                addMethod.Invoke(existingNavigationObject, new[] {newValue});
                             }
 
                             //Update sub navigation
                             insertUpdateOrDeleteGraph(context, newValue, existingValue, existingEntry.Metadata.ClrType.FullName);
                         }
 
-                        foreach (var existingValue in existingNavigationObjectList.ToList())
+                        foreach (var existingValue in existingNavigationObject.ToList())
                         {
                             var existingId = context.Entry(existingValue).GetPrimaryKeyValues();
 
-                            if (passedNavigationObjectList.All(v => !context.Entry(v).GetPrimaryKeyValues().SequenceEqual(existingId)))
+                            if (passedNavigationObjectEnumerable.All(v => !context.Entry(v).GetPrimaryKeyValues().SequenceEqual(existingId)))
                             {
-                                context.Remove(existingValue);
+                                var addMethod = existingNavigationObject.GetType().GetMethod("Remove");
+
+                                if (addMethod == null)
+                                    throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have an 'Remove' method.");
+                                
+                                addMethod.Invoke(existingNavigationObject, new[] { existingValue });
                             }
                         }
                     }

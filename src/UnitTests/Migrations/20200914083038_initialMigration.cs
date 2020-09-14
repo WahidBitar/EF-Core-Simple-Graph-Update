@@ -8,6 +8,19 @@ namespace UnitTests.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Degrees",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Degrees", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Schools",
                 columns: table => new
                 {
@@ -121,6 +134,7 @@ namespace UnitTests.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    DegreeId = table.Column<int>(nullable: true),
                     ClassId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     DateOfBirth = table.Column<DateTimeOffset>(nullable: false)
@@ -134,6 +148,12 @@ namespace UnitTests.Migrations
                         principalTable: "Classes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Students_Degrees_DegreeId",
+                        column: x => x.DegreeId,
+                        principalTable: "Degrees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -150,6 +170,11 @@ namespace UnitTests.Migrations
                 name: "IX_Students_ClassId",
                 table: "Students",
                 column: "ClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_DegreeId",
+                table: "Students",
+                column: "DegreeId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -171,6 +196,9 @@ namespace UnitTests.Migrations
 
             migrationBuilder.DropTable(
                 name: "Classes");
+
+            migrationBuilder.DropTable(
+                name: "Degrees");
 
             migrationBuilder.DropTable(
                 name: "Schools");

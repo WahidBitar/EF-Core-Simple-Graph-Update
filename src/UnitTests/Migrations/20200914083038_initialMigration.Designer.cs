@@ -10,7 +10,7 @@ using UnitTests;
 namespace UnitTests.Migrations
 {
     [DbContext(typeof(FakeSchoolsDbContext))]
-    [Migration("20200913092055_initialMigration")]
+    [Migration("20200914083038_initialMigration")]
     partial class initialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,6 +72,21 @@ namespace UnitTests.Migrations
                     b.ToTable("ClassTeacher");
                 });
 
+            modelBuilder.Entity("FakeModel.Degree", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Degrees");
+                });
+
             modelBuilder.Entity("FakeModel.School", b =>
                 {
                     b.Property<int>("Id")
@@ -119,12 +134,17 @@ namespace UnitTests.Migrations
                     b.Property<DateTimeOffset>("DateOfBirth")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("DegreeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClassId");
+
+                    b.HasIndex("DegreeId");
 
                     b.ToTable("Students");
                 });
@@ -195,6 +215,10 @@ namespace UnitTests.Migrations
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("FakeModel.Degree", "Degree")
+                        .WithMany("Students")
+                        .HasForeignKey("DegreeId");
                 });
 #pragma warning restore 612, 618
         }

@@ -51,10 +51,21 @@ namespace FakeModel
     public class Student
     {
         public Guid Id { get; set; }
+        public int? DegreeId { get; set; }
         public int ClassId { get; set; }
         public string Name { get; set; }
         public DateTimeOffset DateOfBirth { get; set; }
         public Class Class { get; set; }
+        public Degree Degree { get; set; }
+    }
+
+
+
+    public class Degree
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public ICollection<Student> Students { get; set; } = new HashSet<Student>();
     }
 
 

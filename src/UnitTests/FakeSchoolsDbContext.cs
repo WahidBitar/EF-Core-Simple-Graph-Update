@@ -18,6 +18,7 @@ namespace UnitTests
         public DbSet<School> Schools { get; set; }
         public DbSet<SchoolHouse> SchoolHouses { get; set; }
         public DbSet<Class> Classes { get; set; }
+        public DbSet<Degree> Degrees { get; set; }
         public DbSet<ClassLaboratory> ClassLaboratories { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
@@ -33,7 +34,8 @@ namespace UnitTests
             builder.Entity<ClassLaboratory>(configureClassLaboratory);
             builder.Entity<Teacher>(configureTeacher);
             builder.Entity<ClassTeacher>(configureClassTeacher);
-            builder.Entity<Student>(configureConfigureStudent);
+            builder.Entity<Student>(configureStudent);
+            builder.Entity<Degree>(configureDegree);
         }
 
 
@@ -83,14 +85,17 @@ namespace UnitTests
         }
 
 
-        private void configureConfigureStudent(EntityTypeBuilder<Student> builder)
+        private void configureStudent(EntityTypeBuilder<Student> builder)
         {
         }
 
 
-        public override void Dispose()
+        private void configureDegree(EntityTypeBuilder<Degree> builder)
         {
-            base.Dispose();
+            builder.HasMany(x => x.Students)
+                .WithOne(x => x.Degree)
+                .HasForeignKey(x => x.DegreeId)
+                .IsRequired(false);
         }
     }
 }
