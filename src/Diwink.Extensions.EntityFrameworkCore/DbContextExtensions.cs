@@ -91,12 +91,12 @@ namespace Diwink.Extensions.EntityFrameworkCore
 
                             if (passedNavigationObjectEnumerable.All(v => !context.Entry(v).GetPrimaryKeyValues().SequenceEqual(existingId)))
                             {
-                                var addMethod = existingNavigationObject.GetType().GetMethod("Remove");
+                                var removeMethod = existingNavigationObject.GetType().GetMethod("Remove");
 
-                                if (addMethod == null)
+                                if (removeMethod == null)
                                     throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have an 'Remove' method.");
                                 
-                                addMethod.Invoke(existingNavigationObject, new[] { existingValue });
+                                removeMethod.Invoke(existingNavigationObject, new[] { existingValue });
                             }
                         }
                     }
