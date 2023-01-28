@@ -56,7 +56,9 @@ namespace Diwink.Extensions.EntityFrameworkCore
                 {
                     var passedNavigationObject = existingEntry.Entity.GetType().GetProperty(navigationEntry.Metadata.Name)?.GetValue(newEntity);
 
-                    if (navigationEntry.Metadata.IsCollection())
+                    //if (navigationEntry.Metadata.IsCollection()) causes Error CS1929  'INavigationBase' does not contain a definition for 'IsCollection' and the best extension method overload 'NavigationExtensions.IsCollection(INavigation)' requires a receiver of type 'INavigation'   
+                    //use instead https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.changetracking.collectionentry?view=efcore-7.0
+                    if (navigationEntry is CollectionEntry)
                     {
                         // the navigation property is list
                         if (!(navigationEntry.CurrentValue is IEnumerable<object> existingNavigationObject))
