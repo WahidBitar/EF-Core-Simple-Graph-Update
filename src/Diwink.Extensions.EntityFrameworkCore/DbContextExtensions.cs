@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -31,21 +31,23 @@ namespace Diwink.Extensions.EntityFrameworkCore
         /// <param name="context"></param>
         /// <param name="newEntity">The De-Attached Entity</param>
         /// <param name="existingEntity">The Attached BD Entity</param>
-        public static void InsertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity) where T : class
+        public static T InsertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity) where T : class
         {
-            insertUpdateOrDeleteGraph(context, newEntity, existingEntity, null);
+            return insertUpdateOrDeleteGraph(context, newEntity, existingEntity, null);
         }
 
 
-        private static void insertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity, string aggregateType) where T : class
+        private static T insertUpdateOrDeleteGraph<T>(this DbContext context, T newEntity, T existingEntity, string aggregateType) where T : class
         {
             if (existingEntity == null)
             {
                 context.Add(newEntity);
+                return newEntity;
             }
             else if (newEntity == null)
             {
                 context.Remove(existingEntity);
+                return null;
             }
             else
             {
@@ -106,6 +108,8 @@ namespace Diwink.Extensions.EntityFrameworkCore
                         insertUpdateOrDeleteGraph(context, passedNavigationObject, navigationEntry.CurrentValue, existingEntry.Metadata.ClrType.FullName);
                     }
                 }
+
+                return existingEntity;
             }
         }
     }
