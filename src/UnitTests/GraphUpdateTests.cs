@@ -292,7 +292,6 @@ namespace UnitTests
 				'Mersin'
 					]
             }");
-
             var dbSchool = dbContext.Schools
                 .Include(s => s.House)
                 .FirstOrDefault();
@@ -319,8 +318,13 @@ namespace UnitTests
         [Test]
         public void S0061_Set_Classes_From_The_School_Null_Should_Make_The_Classes_Empty()
         {
-            dbContext.InsertUpdateOrDeleteGraph(school, null);//Initialise school to have dbSchool not null
-            dbContext.SaveChanges();
+            var dbSchoolInitial = dbContext.Schools.FirstOrDefault();
+            if (dbSchoolInitial == null)
+            {
+                dbContext.InsertUpdateOrDeleteGraph(school, null); //Initialise school to have dbSchool not null
+                dbContext.SaveChanges();
+            }
+
             var dbSchool = dbContext.Schools
                 .Include(s => s.Classes)
                 .FirstOrDefault();
