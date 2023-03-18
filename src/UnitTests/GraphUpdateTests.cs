@@ -292,7 +292,7 @@ namespace UnitTests
 				'Mersin'
 					]
             }");
-             var dbSchool = dbContext.Schools
+            var dbSchool = dbContext.Schools
                 .Include(s => s.House)
                 .FirstOrDefault();
 
