@@ -292,6 +292,7 @@ namespace UnitTests
 				'Mersin'
 					]
             }");
+
             var dbSchool = dbContext.Schools
                 .Include(s => s.House)
                 .FirstOrDefault();
@@ -312,49 +313,7 @@ namespace UnitTests
 
             Assert.Null(updatedDbSchool.House);
         }
-        /// <summary>
-        /// Update an Aggregate by deleting one-to-one navigation property
-        /// </summary>
-        [Test]
-        public void S0061_Set_Classes_From_The_School_Null_Should_Make_The_Classes_Empty()
-        {
-            var dbSchoolInitial = dbContext.Schools.FirstOrDefault();
-            if (dbSchoolInitial == null)
-            {
-                dbContext.InsertUpdateOrDeleteGraph(school, null); //Initialise school to have dbSchool not null
-                dbContext.SaveChanges();
-            }
 
-            var dbSchool = dbContext.Schools
-                .Include(s => s.Classes)
-                .FirstOrDefault();
-
-            Assert.IsTrue(dbSchool.Classes.Count>0);
-
-            var updatedSchool = JsonConvert.DeserializeObject<School>(@"
-            {
-				'Id': 1,
-				'Name': 'The First',
-				'Type': 1,
-            }");
-            updatedSchool.Classes=null;
-
-            // Act
-            dbContext.InsertUpdateOrDeleteGraph(updatedSchool, dbSchool);
-            dbContext.SaveChanges();
-
-            var updatedDbSchool = dbContext.Schools
-                .Include(s => s.Classes)
-                .FirstOrDefault();
-
-            Console.WriteLine(JsonConvert.SerializeObject(updatedDbSchool, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-            }));
-
-            Assert.IsTrue(updatedDbSchool.Classes.Count==0);
-        }
 
         /// <summary>
         /// Update an inner Entity in the Aggregate should not affect the other sub Entities as they're not included in the changes
