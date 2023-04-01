@@ -65,38 +65,43 @@ namespace Diwink.Extensions.EntityFrameworkCore
                         // the navigation property is list
                         if (!(navigationEntry.CurrentValue is IEnumerable<object> existingNavigationObject))
                             throw new NullReferenceException($"Couldn't iterate through the DB value of the Navigation '{navigationEntry.Metadata.Name}'");
+                        IEnumerable<object> passedNavigationObjectEnumerable = null;
 
-                        if (!(passedNavigationObject is IEnumerable<object> passedNavigationObjectEnumerable))
-                            throw new NullReferenceException($"Couldn't iterate through the passed Navigation list of '{navigationEntry.Metadata.Name}'");
-                        
-                        foreach (var newValue in passedNavigationObjectEnumerable)
+                        if (passedNavigationObject != null) //skip null children  in newEntity. 
                         {
-                            var newId = context.Entry(newValue).GetPrimaryKeyValues();
-                            var existingValue = existingNavigationObject.FirstOrDefault(v => context.Entry(v).GetPrimaryKeyValues().SequenceEqual(newId));
-                            if (existingValue == null)
+                            passedNavigationObjectEnumerable = passedNavigationObject as IEnumerable<object>;
+                            if (passedNavigationObject ==null)
+                                throw new NullReferenceException($"Couldn't iterate through the passed Navigation list of '{navigationEntry.Metadata.Name}'");
+
+                            foreach (var newValue in passedNavigationObjectEnumerable)
                             {
-                                var addMethod = existingNavigationObject.GetType().GetMethod("Add");
+                                var newId = context.Entry(newValue).GetPrimaryKeyValues();
+                                var existingValue = existingNavigationObject.FirstOrDefault(v => context.Entry(v).GetPrimaryKeyValues().SequenceEqual(newId));
+                                if (existingValue == null)
+                                {
+                                    var addMethod = existingNavigationObject.GetType().GetMethod("Add");
 
-                                if (addMethod == null)
-                                    throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have an 'Add' method.");
+                                    if (addMethod == null)
+                                        throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have an 'Add' method.");
 
-                                addMethod.Invoke(existingNavigationObject, new[] {newValue});
+                                    addMethod.Invoke(existingNavigationObject, new[] { newValue });
+                                }
+
+                                //Update sub navigation
+                                insertUpdateOrDeleteGraph(context, newValue, existingValue, existingEntry.Metadata.ClrType.FullName);
                             }
-
-                            //Update sub navigation
-                            insertUpdateOrDeleteGraph(context, newValue, existingValue, existingEntry.Metadata.ClrType.FullName);
                         }
 
                         foreach (var existingValue in existingNavigationObject.ToList())
                         {
                             var existingId = context.Entry(existingValue).GetPrimaryKeyValues();
-
-                            if (passedNavigationObjectEnumerable.All(v => !context.Entry(v).GetPrimaryKeyValues().SequenceEqual(existingId)))
+							//If passedNavigationObject is null, delete existing records
+                            if (passedNavigationObject==null || passedNavigationObjectEnumerable.All(v => !context.Entry(v).GetPrimaryKeyValues().SequenceEqual(existingId)))
                             {
                                 var removeMethod = existingNavigationObject.GetType().GetMethod("Remove");
 
                                 if (removeMethod == null)
-                                    throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have an 'Remove' method.");
+                                    throw new NullReferenceException($"The collection type in the Navigation property '{navigationEntry.Metadata.Name}' doesn't have a 'Remove' method.");
                                 
                                 removeMethod.Invoke(existingNavigationObject, new[] { existingValue });
                             }
