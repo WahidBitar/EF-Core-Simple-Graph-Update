@@ -13,10 +13,9 @@
     <PackageReleaseNotes>simple update method that will help you to do a full update to an aggregate graph with all related entities in it.
 the update method will take the loaded aggregate entity from the DB and the passed one that may come from the API layer. Internally the method will update just the eager loaded entities in the aggregate "The included entities"</PackageReleaseNotes>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.7.0</AssemblyVersion>
-    <FileVersion>1.0.7.0</FileVersion>
-    <Version>1.0.7</Version>
-    <PackageLicenseFile></PackageLicenseFile>
+    <AssemblyVersion>1.0.8.0</AssemblyVersion>
+    <FileVersion>1.0.8.0</FileVersion>
+    <Version>1.0.8</Version>
   </PropertyGroup>
 
   <ItemGroup>
