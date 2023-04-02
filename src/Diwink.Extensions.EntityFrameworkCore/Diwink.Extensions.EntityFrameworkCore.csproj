@@ -1,25 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>Wahid Bitar</Authors>
-    <Company>Digital Wink</Company>
-    <Product>Diwink.Extensions</Product>
-    <Description>Helpers extentions for Entity Framework Core</Description>
-    <PackageProjectUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>EntityFrameworkCore;Extensions;Digital Wink;EntityFramework;EF Core</PackageTags>
-    <PackageReleaseNotes>simple update method that will help you to do a full update to an aggregate graph with all related entities in it.
-the update method will take the loaded aggregate entity from the DB and the passed one that may come from the API layer. Internally the method will update just the eager loaded entities in the aggregate "The included entities"</PackageReleaseNotes>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
-    <Version>1.0.8</Version>
-  </PropertyGroup>
+    <PropertyGroup>
+        <PackageIcon>Icon</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <OutputType>Library</OutputType>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <Title>Diwink.Extensions.EntityFrameworkCore</Title>
+        <AssemblyName>DiWink.Extensions.EntityFrameworkCore</AssemblyName>
+        <RootNamespace>DiWink.Extensions.EntityFrameworkCore</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[3.1.8,4)" />
-  </ItemGroup>
-
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.4" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="Content\Readme" />
+        <None Include="..\icon.png" Link="Content\Icon">
+          <Pack>True</Pack>
+          <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
+  
 </Project>
