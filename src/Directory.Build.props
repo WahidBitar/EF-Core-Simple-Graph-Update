@@ -1,0 +1,28 @@
+<Project>
+    <PropertyGroup>
+
+        <Version>2.0.0-beta</Version>
+
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Authors>Wahid Bitar</Authors>
+        <Company>Digital Wink</Company>
+        <Product>Diwink.Extensions</Product>
+        <Description>Helpers extentions for Entity Framework Core</Description>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <PackageProjectUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>EntityFrameworkCore;Extensions;Digital Wink;EntityFramework;EF Core</PackageTags>
+        <PackageReleaseNotes>simple update method that will help you to do a full update to an aggregate graph with all related entities in it.
+            the update method will take the loaded aggregate entity from the DB and the passed one that may come from the API layer. Internally the method will update just the eager loaded entities in the aggregate "The included entities"
+        </PackageReleaseNotes>
+        
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    </PropertyGroup>
+</Project>

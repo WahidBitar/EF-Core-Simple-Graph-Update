@@ -35,7 +35,7 @@ public static class DbContextExtensions
     /// <param name="context"></param>
     /// <param name="newEntity">The De-Attached Entity</param>
     /// <param name="existingEntity">The Attached BD Entity</param>
-    public static T? InsertUpdateOrDeleteGraph<T>(this DbContext context, T? newEntity, T? existingEntity) where T : class
+    public static T? UpdateGraph<T>(this DbContext context, T? newEntity, T? existingEntity) where T : class
     {
         return insertUpdateOrDeleteGraph(context, newEntity, existingEntity, null);
     }
