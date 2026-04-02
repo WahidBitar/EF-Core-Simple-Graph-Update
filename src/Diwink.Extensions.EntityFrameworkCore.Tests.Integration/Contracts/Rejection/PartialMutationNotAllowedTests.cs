@@ -1,10 +1,10 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
-using Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+using Diwink.Extensions.EntityFrameworkCore.Exceptions;
+using Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
+using Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Contracts.Rejection;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Contracts.Rejection;
 
 /// <summary>
 /// Integration tests proving all-or-nothing rejection semantics (FR-017).

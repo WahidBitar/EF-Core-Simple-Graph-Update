@@ -1,9 +1,9 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
-using Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+using Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
+using Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Contracts.OneToOne;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Contracts.OneToOne;
 
 /// <summary>
 /// Integration contract tests for required one-to-one (Course -> CoursePolicy).

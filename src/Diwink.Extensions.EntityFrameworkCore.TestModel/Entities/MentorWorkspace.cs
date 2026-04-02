@@ -1,4 +1,4 @@
-namespace Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
+namespace Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
 
 public class MentorWorkspace
 {

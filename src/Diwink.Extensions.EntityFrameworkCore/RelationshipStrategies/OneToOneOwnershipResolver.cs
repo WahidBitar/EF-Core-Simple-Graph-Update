@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.RelationshipStrategies;
+namespace Diwink.Extensions.EntityFrameworkCore.RelationshipStrategies;
 
 /// <summary>
 /// Resolves one-to-one ownership semantics from EF Core metadata.

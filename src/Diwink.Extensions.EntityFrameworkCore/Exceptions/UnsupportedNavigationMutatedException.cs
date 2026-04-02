@@ -1,4 +1,4 @@
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
+namespace Diwink.Extensions.EntityFrameworkCore.Exceptions;
 
 /// <summary>
 /// Thrown when a loaded navigation of a currently-unsupported relationship type

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+namespace Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 
 /// <summary>
 /// Handles creation and update of related entities through supported

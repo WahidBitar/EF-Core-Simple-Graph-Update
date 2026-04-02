@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+namespace Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 
 /// <summary>
 /// Extracts and compares primary key values from entities using EF Core metadata.

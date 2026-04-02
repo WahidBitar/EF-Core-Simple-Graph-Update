@@ -1,8 +1,8 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
+using Diwink.Extensions.EntityFrameworkCore.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Traversal;
+namespace Diwink.Extensions.EntityFrameworkCore.Traversal;
 
 /// <summary>
 /// Validates that all navigations required for a graph mutation are explicitly loaded.

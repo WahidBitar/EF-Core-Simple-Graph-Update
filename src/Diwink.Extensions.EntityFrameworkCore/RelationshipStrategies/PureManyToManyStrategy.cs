@@ -1,8 +1,8 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+using Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.RelationshipStrategies;
+namespace Diwink.Extensions.EntityFrameworkCore.RelationshipStrategies;
 
 /// <summary>
 /// Handles pure many-to-many (skip navigation) mutations.

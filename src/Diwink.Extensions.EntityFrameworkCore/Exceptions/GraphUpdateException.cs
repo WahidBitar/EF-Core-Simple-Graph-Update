@@ -1,4 +1,4 @@
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
+namespace Diwink.Extensions.EntityFrameworkCore.Exceptions;
 
 /// <summary>
 /// Base exception for all graph update contract violations.

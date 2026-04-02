@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Diwink.Extensions.EntityFrameworkCore.V2\Diwink.Extensions.EntityFrameworkCore.V2.csproj" />
-    <ProjectReference Include="..\Diwink.Extensions.EntityFrameworkCore.V2.TestModel\Diwink.Extensions.EntityFrameworkCore.V2.TestModel.csproj" />
+    <ProjectReference Include="..\Diwink.Extensions.EntityFrameworkCore\Diwink.Extensions.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\Diwink.Extensions.EntityFrameworkCore.TestModel\Diwink.Extensions.EntityFrameworkCore.TestModel.csproj" />
   </ItemGroup>
 
 </Project>

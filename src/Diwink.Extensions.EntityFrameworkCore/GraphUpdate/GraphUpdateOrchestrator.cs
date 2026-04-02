@@ -1,11 +1,11 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
-using Diwink.Extensions.EntityFrameworkCore.V2.RelationshipStrategies;
-using Diwink.Extensions.EntityFrameworkCore.V2.Traversal;
+using Diwink.Extensions.EntityFrameworkCore.Exceptions;
+using Diwink.Extensions.EntityFrameworkCore.RelationshipStrategies;
+using Diwink.Extensions.EntityFrameworkCore.Traversal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+namespace Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 
 /// <summary>
 /// Core orchestrator that diffs a detached updated entity graph against a tracked

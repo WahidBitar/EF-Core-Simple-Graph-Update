@@ -1,7 +1,7 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel;
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
+using Diwink.Extensions.EntityFrameworkCore.TestModel;
+using Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 
 /// <summary>
 /// Deterministic seed data used across integration contract tests.
@@ -23,7 +23,7 @@ public static class SeedData
     /// <summary>
     /// Seeds a complete test scenario with all relationship types represented.
     /// </summary>
-    public static async Task SeedFullScenarioAsync(V2TestDbContext context)
+    public static async Task SeedFullScenarioAsync(TestDbContext context)
     {
         var tag1 = new TopicTag { Id = Tag1Id, Label = "Architecture" };
         var tag2 = new TopicTag { Id = Tag2Id, Label = "Testing" };

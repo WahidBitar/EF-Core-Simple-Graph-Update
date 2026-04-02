@@ -1,8 +1,8 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
-using Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+using Diwink.Extensions.EntityFrameworkCore.Exceptions;
+using Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 using FluentAssertions;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit.GraphDiff;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Unit.GraphDiff;
 
 /// <summary>
 /// Unit tests for OperationGuard all-or-nothing behavior (FR-017).

@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="Diwink.Extensions.EntityFrameworkCore.V2.TestModel/Diwink.Extensions.EntityFrameworkCore.V2.TestModel.csproj" />
-  <Project Path="Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration/Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.csproj" />
-  <Project Path="Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit/Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit.csproj" />
-  <Project Path="Diwink.Extensions.EntityFrameworkCore.V2/Diwink.Extensions.EntityFrameworkCore.V2.csproj" />
+  <Project Path="Diwink.Extensions.EntityFrameworkCore.TestModel/Diwink.Extensions.EntityFrameworkCore.TestModel.csproj" />
+  <Project Path="Diwink.Extensions.EntityFrameworkCore.Tests.Integration/Diwink.Extensions.EntityFrameworkCore.Tests.Integration.csproj" />
+  <Project Path="Diwink.Extensions.EntityFrameworkCore.Tests.Unit/Diwink.Extensions.EntityFrameworkCore.Tests.Unit.csproj" />
+  <Project Path="Diwink.Extensions.EntityFrameworkCore/Diwink.Extensions.EntityFrameworkCore.csproj" />
 </Solution>

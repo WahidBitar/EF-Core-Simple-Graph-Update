@@ -1,13 +1,13 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+using Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 using Microsoft.EntityFrameworkCore;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2;
+namespace Diwink.Extensions.EntityFrameworkCore;
 
 /// <summary>
 /// Public extension methods for EF Core graph update v2.
 /// Accepts a detached object graph and diffs it against the tracked original (FR-001a).
 /// </summary>
-public static class DbContextExtensionsV2
+public static class DbContextExtensions
 {
     /// <summary>
     /// Updates the tracked <paramref name="existingEntity"/> graph to match the

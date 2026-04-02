@@ -1,6 +1,6 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel;
+using Diwink.Extensions.EntityFrameworkCore.TestModel;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 
 /// <summary>
 /// Base class for integration tests. Provides per-test database isolation
@@ -29,7 +29,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     /// <summary>
     /// Creates a fresh DbContext for the current test.
     /// </summary>
-    protected V2TestDbContext CreateContext()
+    protected TestDbContext CreateContext()
     {
         return DatabaseBootstrap.CreateContext(ConnectionString);
     }

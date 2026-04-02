@@ -1,4 +1,4 @@
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
+namespace Diwink.Extensions.EntityFrameworkCore.Exceptions;
 
 /// <summary>
 /// Thrown when a graph contains both supported and unsupported requested mutations.

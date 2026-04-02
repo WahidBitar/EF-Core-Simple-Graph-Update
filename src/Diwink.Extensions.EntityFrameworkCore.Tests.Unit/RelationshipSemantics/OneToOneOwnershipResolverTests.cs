@@ -1,9 +1,9 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel;
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
+using Diwink.Extensions.EntityFrameworkCore.TestModel;
+using Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit.RelationshipSemantics;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Unit.RelationshipSemantics;
 
 /// <summary>
 /// Unit tests for one-to-one ownership resolver and removal strategy selection.
@@ -11,12 +11,12 @@ namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit.RelationshipSemant
 /// </summary>
 public class OneToOneOwnershipResolverTests
 {
-    private static V2TestDbContext CreateInMemoryContext(string? dbName = null)
+    private static TestDbContext CreateInMemoryContext(string? dbName = null)
     {
-        var options = new DbContextOptionsBuilder<V2TestDbContext>()
+        var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseInMemoryDatabase(databaseName: dbName ?? Guid.NewGuid().ToString())
             .Options;
-        return new V2TestDbContext(options);
+        return new TestDbContext(options);
     }
 
     [Fact]

@@ -1,10 +1,10 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel;
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
-using Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+using Diwink.Extensions.EntityFrameworkCore.TestModel;
+using Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
+using Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Contracts.ManyToMany;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Contracts.ManyToMany;
 
 /// <summary>
 /// Safety contract tests ensuring many-to-many unlink/remove operations never

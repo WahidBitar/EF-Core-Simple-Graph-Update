@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.RelationshipStrategies;
+namespace Diwink.Extensions.EntityFrameworkCore.RelationshipStrategies;
 
 /// <summary>
 /// Handles required one-to-one dependent removal.

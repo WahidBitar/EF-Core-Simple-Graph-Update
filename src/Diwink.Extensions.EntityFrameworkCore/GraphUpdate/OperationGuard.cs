@@ -1,6 +1,6 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.Exceptions;
+using Diwink.Extensions.EntityFrameworkCore.Exceptions;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.GraphUpdate;
+namespace Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 
 /// <summary>
 /// Enforces all-or-nothing rejection semantics (FR-017).

@@ -1,8 +1,8 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Entities;
+using Diwink.Extensions.EntityFrameworkCore.TestModel.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.TestModel.Configurations;
+namespace Diwink.Extensions.EntityFrameworkCore.TestModel.Configurations;
 
 public class MentorWorkspaceConfiguration : IEntityTypeConfiguration<MentorWorkspace>
 {

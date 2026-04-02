@@ -1,7 +1,7 @@
-using Diwink.Extensions.EntityFrameworkCore.V2.TestModel;
+using Diwink.Extensions.EntityFrameworkCore.TestModel;
 using Microsoft.EntityFrameworkCore;
 
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 
 /// <summary>
 /// Handles schema creation and optional seed data initialization
@@ -12,13 +12,13 @@ public static class DatabaseBootstrap
     /// <summary>
     /// Creates a fresh DbContext pointing at the container and ensures the schema exists.
     /// </summary>
-    public static V2TestDbContext CreateContext(string connectionString)
+    public static TestDbContext CreateContext(string connectionString)
     {
-        var options = new DbContextOptionsBuilder<V2TestDbContext>()
+        var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseSqlServer(connectionString)
             .Options;
 
-        return new V2TestDbContext(options);
+        return new TestDbContext(options);
     }
 
     /// <summary>

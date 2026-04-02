@@ -1,4 +1,4 @@
-namespace Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration.Infrastructure;
+namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
 
 /// <summary>
 /// xUnit collection definition that shares a single SQL Server container

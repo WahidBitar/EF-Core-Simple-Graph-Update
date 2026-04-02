@@ -9,7 +9,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-31
 ## Project Structure
 
 ```text
-src-v2/
+src/
 specs/
 ```
 
@@ -17,8 +17,8 @@ specs/
 
 - `dotnet restore`
 - `dotnet test`
-- `dotnet test src-v2/Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit/`
-- `dotnet test src-v2/Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration/`
+- `dotnet test src/Diwink.Extensions.EntityFrameworkCore.Tests.Unit/`
+- `dotnet test src/Diwink.Extensions.EntityFrameworkCore.Tests.Integration/`
 
 ## Code Style
 
