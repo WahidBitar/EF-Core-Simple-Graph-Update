@@ -23,4 +23,42 @@ dbContext.SaveChanges();
 
 ```
 
+## v2 Rebuild (EF Core 10+)
+
+The v2 rebuild (`src-v2/`) targets .NET 10 and EF Core 10.x with explicit,
+contract-driven relationship semantics.
+
+### Supported Relationship Patterns
+
+| Pattern | Add | Update | Remove | Outcome |
+|---------|-----|--------|--------|---------|
+| Pure many-to-many (skip nav) | Link created | Properties updated | Link removed | Related entity preserved |
+| Payload many-to-many (join entity) | Association inserted | Payload updated | Association deleted | Related entities preserved |
+| Required one-to-one | Dependent inserted | Properties updated | Dependent deleted | Cascade delete |
+| Optional one-to-one | Dependent inserted | Properties updated | FK nulled | Dependent preserved |
+
+### Rejection Behavior
+
+| Scenario | Exception |
+|----------|-----------|
+| Unsupported relationship mutated (e.g., one-to-many) | `UnsupportedNavigationMutatedException` |
+| Unloaded navigation with mutations in updated graph | `UnloadedNavigationMutationException` |
+| Mixed supported + unsupported mutations | `PartialMutationNotAllowedException` |
+| Unsupported relationship unchanged | Silently skipped |
+
+### v2 Usage
+
+```csharp
+var updated = BuildDesiredState(); // detached graph
+
+var existing = await dbContext.Courses
+    .Include(c => c.Tags)
+    .Include(c => c.Policy)
+    .Include(c => c.MentorAssignments)
+    .FirstAsync(c => c.Id == id);
+
+dbContext.InsertUpdateOrDeleteGraph(updated, existing);
+await dbContext.SaveChangesAsync();
+```
+
 Please don't hesitate to contribute or give us your feedback and/or advice :rose: :rose:

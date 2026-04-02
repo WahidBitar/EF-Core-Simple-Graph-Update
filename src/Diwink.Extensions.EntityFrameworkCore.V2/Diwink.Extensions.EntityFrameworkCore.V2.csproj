@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <PackageId>Diwink.Extensions.EntityFrameworkCore</PackageId>
+    <Version>2.0.0</Version>
+    <Authors>Wahid Bitar</Authors>
+    <Company>Digital Wink</Company>
+    <Description>Simple graph update extension for Entity Framework Core - v2 rebuild targeting EF Core 10+</Description>
+    <RepositoryUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Diwink.Extensions.EntityFrameworkCore.V2.Tests.Unit" />
+    <InternalsVisibleTo Include="Diwink.Extensions.EntityFrameworkCore.V2.Tests.Integration" />
+  </ItemGroup>
+
+</Project>

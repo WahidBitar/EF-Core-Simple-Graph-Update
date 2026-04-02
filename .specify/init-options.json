@@ -1,7 +1,7 @@
 {
-  "ai": "codex",
+  "ai": "claude",
   "ai_commands_dir": null,
-  "ai_skills": true,
+  "ai_skills": false,
   "branch_numbering": "sequential",
   "here": true,
   "offline": false,
