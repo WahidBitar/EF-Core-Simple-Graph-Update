@@ -12,6 +12,14 @@ namespace Diwink.Extensions.EntityFrameworkCore.RelationshipStrategies;
 /// </summary>
 internal static class PureManyToManyStrategy
 {
+    /// <summary>
+    /// Reconciles a skip-navigation (pure many-to-many) collection with the provided updated set of related entities.
+    /// </summary>
+    /// <remarks>
+    /// Removes links for entities that are no longer present in <paramref name="updatedCollection"/>, updates properties of already-tracked related entities, and adds links for new or discovered entities (marking new entities as added so EF will insert them).</remarks>
+    /// <param name="context">The DbContext used to access entity metadata, track entities, and query the store.</param>
+    /// <param name="existingNavigation">The existing collection navigation entry (skip navigation) to modify.</param>
+    /// <param name="updatedCollection">The desired related entities to be reflected in the navigation; each element represents a related entity instance or a DTO with matching key values.</param>
     public static void Apply(
         DbContext context,
         CollectionEntry existingNavigation,
@@ -84,6 +92,13 @@ internal static class PureManyToManyStrategy
         }
     }
 
+    /// <summary>
+    /// Finds the first entity in a list of tracked items whose primary key values match the provided key values.
+    /// </summary>
+    /// <param name="context">The DbContext used to extract key values for each tracked item.</param>
+    /// <param name="trackedItems">A list of currently tracked entity instances to search.</param>
+    /// <param name="targetKeys">An array of key values to match against each tracked item's primary key values.</param>
+    /// <returns>The matching tracked entity instance if found; otherwise <c>null</c>.</returns>
     private static object? FindInTracked(
         DbContext context,
         List<object> trackedItems,
@@ -98,6 +113,11 @@ internal static class PureManyToManyStrategy
         return null;
     }
 
+    /// <summary>
+    /// Remove an item from a collection-valued navigation property.
+    /// </summary>
+    /// <param name="navigation">The collection navigation entry whose current value will be modified.</param>
+    /// <param name="item">The related entity instance to remove from the navigation collection.</param>
     private static void RemoveFromCollection(CollectionEntry navigation, object item)
     {
         ExecuteCollectionOperation(navigation, item, "remove", static (list, value) =>
@@ -106,6 +126,12 @@ internal static class PureManyToManyStrategy
         });
     }
 
+    /// <summary>
+    /// Add an entity instance to the given navigation collection (handles IList or compatible ICollection&lt;T&gt; implementations).
+    /// </summary>
+    /// <param name="navigation">The EF Core collection navigation entry to modify.</param>
+    /// <param name="item">The entity instance to add to the navigation collection.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the navigation's CurrentValue is null or does not support adding the item's type.</exception>
     private static void AddToCollection(CollectionEntry navigation, object item)
     {
         ExecuteCollectionOperation(navigation, item, "add", static (list, value) =>
@@ -114,6 +140,16 @@ internal static class PureManyToManyStrategy
         });
     }
 
+    /// <summary>
+    /// Performs an add/remove operation against the runtime collection held by a navigation's CurrentValue.
+    /// </summary>
+    /// <param name="navigation">The collection navigation whose CurrentValue will be mutated.</param>
+    /// <param name="item">The item to add or remove from the collection.</param>
+    /// <param name="operation">A short operation name used in error messages (expected values: "add" or "remove").</param>
+    /// <param name="listOperation">A fallback action that performs the operation when the collection implements <see cref="IList"/>.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the navigation's CurrentValue is null; when the CurrentValue's runtime type does not expose a compatible generic <c>ICollection&lt;T&gt;</c> for the item's type; or when the discovered collection interface does not expose the expected Add/Remove method.
+    /// </exception>
     private static void ExecuteCollectionOperation(
         CollectionEntry navigation,
         object item,

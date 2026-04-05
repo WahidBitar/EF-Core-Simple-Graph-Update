@@ -25,7 +25,11 @@ internal sealed class OperationGuard
     /// <summary>
     /// Records a validation error. No mutations should be applied until
     /// <see cref="ThrowIfErrors"/> is called and passes.
+    /// <summary>
+    /// Adds a graph validation error to the guard so it can be enforced later.
     /// </summary>
+    /// <param name="error">The validation error to record; cannot be null.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="error"/> is null.</exception>
     public void AddError(GraphUpdateException error)
     {
         ArgumentNullException.ThrowIfNull(error);
@@ -35,7 +39,14 @@ internal sealed class OperationGuard
     /// <summary>
     /// Throws the first recorded error if any exist, enforcing all-or-nothing
     /// rejection before mutations are applied to the change tracker.
+    /// <summary>
+    /// Enforces collected validation errors by throwing an appropriate exception when any errors were recorded.
     /// </summary>
+    /// <remarks>
+    /// If no errors are recorded, the method returns without side effects.
+    /// </remarks>
+    /// <exception cref="GraphUpdateException">Thrown when exactly one validation error was recorded; the single recorded exception is rethrown.</exception>
+    /// <exception cref="PartialMutationNotAllowedException">Thrown when multiple validation errors were recorded; constructed with the first recorded error's RelationshipPath and a comma-separated list of all recorded RelationshipPath values for diagnostic context.</exception>
     public void ThrowIfErrors()
     {
         if (_errors.Count == 0)

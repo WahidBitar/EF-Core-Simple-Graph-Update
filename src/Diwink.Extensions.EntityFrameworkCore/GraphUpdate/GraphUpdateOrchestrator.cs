@@ -19,7 +19,13 @@ internal static class GraphUpdateOrchestrator
 {
     /// <summary>
     /// Entry point for graph update orchestration.
+    /// <summary>
+    /// Orchestrates validation and application of changes from a detached updated entity graph onto an existing tracked entity graph.
     /// </summary>
+    /// <param name="context">The DbContext that is tracking <paramref name="existingEntity"/> and provides EF metadata and change tracking.</param>
+    /// <param name="updatedEntity">A detached entity graph containing proposed scalar and navigation changes.</param>
+    /// <param name="existingEntity">The tracked root entity whose scalar properties and loaded navigations will be updated.</param>
+    /// <returns>The same <paramref name="existingEntity"/> instance after applying validated updates from <paramref name="updatedEntity"/>.</returns>
     public static T UpdateGraph<T>(DbContext context, T updatedEntity, T existingEntity)
         where T : class
     {
@@ -38,6 +44,15 @@ internal static class GraphUpdateOrchestrator
         return existingEntity;
     }
 
+    /// <summary>
+    /// Validates navigation mutation legality on a tracked entity against a detached updated graph and records any violations in the provided guard.
+    /// </summary>
+    /// <param name="context">The <see cref="DbContext"/> used to resolve metadata and keys.</param>
+    /// <param name="existingEntry">The tracked <see cref="EntityEntry"/> whose navigations are being validated.</param>
+    /// <param name="updatedEntity">The detached updated entity graph to inspect for attempted navigation mutations.</param>
+    /// <param name="aggregateType">The aggregate root CLR type used to ignore navigations that point back to the aggregate root.</param>
+    /// <param name="guard">An <see cref="OperationGuard"/> that will collect validation errors (e.g., unsupported navigation mutations, attempts to mutate unloaded navigations).</param>
+    /// <param name="recursionPath">Optional set used to detect and prevent cycles during recursive validation; callers may supply a shared set for the top-level traversal.</param>
     private static void ValidateNavigations(
         DbContext context,
         EntityEntry existingEntry,
@@ -115,7 +130,12 @@ internal static class GraphUpdateOrchestrator
     /// Checks whether the updated entity provides non-empty values for a navigation
     /// that was not loaded. A non-empty collection or non-null reference is treated
     /// as an attempted mutation on an unloaded navigation (FR-015).
+    /// <summary>
+    /// Determines whether the detached updated entity attempted to mutate the specified unloaded navigation.
     /// </summary>
+    /// <param name="updatedEntity">The detached entity graph provided for the update.</param>
+    /// <param name="navMetadata">Metadata for the navigation property being inspected.</param>
+    /// <returns>`true` if the navigation property exists on the detached entity and represents an attempted mutation (non-null reference or a collection with any items), `false` otherwise.</returns>
     private static bool HasUnloadedMutationAttempt(
         object updatedEntity,
         INavigationBase navMetadata)
@@ -136,6 +156,11 @@ internal static class GraphUpdateOrchestrator
         return true;
     }
 
+    /// <summary>
+    /// Applies navigation property updates from a detached updated entity onto a tracked existing entity entry.
+    /// </summary>
+    /// <param name="updatedEntity">The detached updated entity graph to read navigation values from.</param>
+    /// <param name="aggregateType">The aggregate root CLR type used to identify navigations that point back to the aggregate root and should be skipped.</param>
     internal static void ApplyNavigations(
         DbContext context,
         EntityEntry existingEntry,
@@ -169,6 +194,13 @@ internal static class GraphUpdateOrchestrator
         }
     }
 
+    /// <summary>
+    /// Applies updates to a loaded collection navigation on the tracked entity using the appropriate many-to-many strategy.
+    /// </summary>
+    /// <param name="context">The <see cref="DbContext"/> used for attach/relationship operations.</param>
+    /// <param name="existingNavigation">The tracked collection navigation to update.</param>
+    /// <param name="updatedValue">The detached navigation value from the updated graph; treated as an empty collection when null.</param>
+    /// <param name="classification">The navigation classification that determines which many-to-many strategy to apply.</param>
     private static void ApplyCollectionNavigation(
         DbContext context,
         CollectionEntry existingNavigation,
@@ -193,6 +225,13 @@ internal static class GraphUpdateOrchestrator
         }
     }
 
+    /// <summary>
+    /// Applies an updated reference navigation value to a tracked reference navigation, performing attach, replace, update, detach, or remove actions according to the navigation classification and the presence of existing and updated values.
+    /// </summary>
+    /// <param name="existingNavigation">The tracked reference navigation entry to update.</param>
+    /// <param name="updatedValue">The detached navigation value from the updated graph, or null to indicate removal.</param>
+    /// <param name="classification">The relationship classification for the navigation which determines attach/replace/remove semantics.</param>
+    /// <param name="aggregateType">The aggregate root CLR type used when processing nested navigations.</param>
     private static void ApplyReferenceNavigation(
         DbContext context,
         ReferenceEntry existingNavigation,
@@ -243,7 +282,14 @@ internal static class GraphUpdateOrchestrator
 
     /// <summary>
     /// Classifies a navigation as a supported or unsupported relationship pattern.
+    /// <summary>
+    /// Classifies the given navigation metadata into a relationship pattern used to drive graph update behavior.
     /// </summary>
+    /// <param name="navMetadata">Metadata for the navigation property to classify.</param>
+    /// <returns>
+    /// A NavigationClassification value indicating the relationship pattern:
+    /// `PureManyToMany`, `PayloadManyToMany`, `RequiredOneToOne`, `OptionalOneToOne`, or `Unsupported`.
+    /// </returns>
     internal static NavigationClassification ClassifyNavigation(INavigationBase navMetadata)
     {
         if (navMetadata is ISkipNavigation)
@@ -281,7 +327,11 @@ internal static class GraphUpdateOrchestrator
     /// Detects whether an entity type is a payload join entity (explicit many-to-many).
     /// A payload join entity has a composite key where all key parts are also foreign keys,
     /// AND it has additional non-key, non-FK properties (the payload).
+    /// <summary>
+    /// Determines whether the given entity type represents an explicit many-to-many join entity that carries payload.
     /// </summary>
+    /// <param name="entityType">The EF Core entity metadata to inspect.</param>
+    /// <returns>`true` if the entity has a primary key with at least two properties and every primary key property is included in at least one foreign key; `false` otherwise.</returns>
     private static bool IsPayloadJoinEntity(IEntityType entityType)
     {
         var primaryKey = entityType.FindPrimaryKey();
@@ -309,7 +359,13 @@ internal static class GraphUpdateOrchestrator
     /// <summary>
     /// Checks whether a loaded navigation has mutations between existing and updated state.
     /// Used for FR-018 to detect changes in unsupported navigation types.
+    /// <summary>
+    /// Determines whether the detached updated entity proposes mutations for the specified loaded navigation.
     /// </summary>
+    /// <param name="navigation">The tracked navigation entry on the existing entity to compare against.</param>
+    /// <param name="updatedEntity">The detached updated entity containing the candidate navigation value.</param>
+    /// <param name="navMetadata">Metadata for the navigation property being inspected.</param>
+    /// <returns>`true` if the updated entity contains mutations for the navigation — for collections: differing counts, a missing primary-key match, or scalar property differences on matched items; for references: null/non-null changes, differing primary keys, or scalar property differences; `false` otherwise.</returns>
     private static bool HasMutations(
         DbContext context,
         NavigationEntry navigation,
@@ -362,6 +418,15 @@ internal static class GraphUpdateOrchestrator
         return false;
     }
 
+    /// <summary>
+    /// Recursively validates loaded child navigations when the detached updated entity provides values for them.
+    /// </summary>
+    /// <param name="context">The DbContext used to obtain tracked entries and metadata.</param>
+    /// <param name="navigation">The loaded navigation on the tracked entity to validate against the detached value.</param>
+    /// <param name="updatedEntity">The detached entity (or detached navigation value) that may contain proposed child values.</param>
+    /// <param name="aggregateType">The aggregate root CLR type used to detect navigations that point back to the aggregate root.</param>
+    /// <param name="guard">An OperationGuard that accumulates validation errors found during traversal.</param>
+    /// <param name="recursionPath">A reference-equality HashSet used to track visited entities and prevent recursive cycles during validation.</param>
     private static void ValidateLoadedChildren(
         DbContext context,
         NavigationEntry navigation,
@@ -415,6 +480,13 @@ internal static class GraphUpdateOrchestrator
         }
     }
 
+    /// <summary>
+    /// Attempts to read the value of the navigation property named by <paramref name="navMetadata"/> from <paramref name="updatedEntity"/>.
+    /// </summary>
+    /// <param name="updatedEntity">The detached entity to read the navigation value from.</param>
+    /// <param name="navMetadata">Metadata describing the navigation property to read (its Name is used to locate the CLR property).</param>
+    /// <param name="updatedValue">The value of the navigation property if found; otherwise null.</param>
+    /// <returns>`true` if the navigation property exists on <paramref name="updatedEntity"/> and its value was retrieved; `false` otherwise.</returns>
     private static bool TryGetUpdatedNavigationValue(
         object updatedEntity,
         INavigationBase navMetadata,
@@ -431,6 +503,12 @@ internal static class GraphUpdateOrchestrator
         return true;
     }
 
+    /// <summary>
+    /// Determines whether any non-shadow scalar property values differ between the tracked entity entry and the detached updated entity.
+    /// </summary>
+    /// <param name="existingEntry">The tracked entity entry to compare against.</param>
+    /// <param name="updatedEntity">The detached entity containing proposed property values.</param>
+    /// <returns>`true` if any scalar (non-shadow) property value differs between the tracked entry and the detached entity, `false` otherwise.</returns>
     private static bool HasScalarDifferences(EntityEntry existingEntry, object updatedEntity)
     {
         foreach (var property in existingEntry.Metadata.GetProperties()
@@ -445,6 +523,12 @@ internal static class GraphUpdateOrchestrator
         return false;
     }
 
+    /// <summary>
+    /// Determines whether the primary key values of a tracked entity and a detached entity match.
+    /// </summary>
+    /// <param name="existingValue">The tracked entity instance whose key values are read from the context.</param>
+    /// <param name="updatedValue">The detached entity instance whose key values are read for comparison.</param>
+    /// <returns>`true` if the primary key values are equal, `false` otherwise.</returns>
     private static bool ReferenceKeysMatch(DbContext context, object existingValue, object updatedValue)
     {
         var existingKeys = EntityKeyHelper.GetKeyValues(context.Entry(existingValue));
@@ -452,12 +536,25 @@ internal static class GraphUpdateOrchestrator
         return EntityKeyHelper.KeysEqual(existingKeys, updatedKeys);
     }
 
+    /// <summary>
+    /// Determines whether the navigation's target entity type is the aggregate root type.
+    /// </summary>
+    /// <param name="navMetadata">The navigation metadata to inspect.</param>
+    /// <param name="aggregateType">The aggregate root CLR type to compare against.</param>
+    /// <returns>`true` if the navigation's target entity CLR type equals <paramref name="aggregateType"/>, `false` otherwise.</returns>
     private static bool IsNavigationBackToAggregateRoot(INavigationBase navMetadata, Type aggregateType)
     {
         return navMetadata is INavigation nav &&
                nav.TargetEntityType.ClrType == aggregateType;
     }
 
+    /// <summary>
+    /// Get a human-readable relationship type name for the given navigation metadata.
+    /// </summary>
+    /// <param name="navMetadata">The navigation metadata to classify.</param>
+    /// <returns>
+    /// One of: "SkipNavigation", "OneToMany", "OneToOne", "ManyToOne", or "Unknown" describing the relationship type.
+    /// </returns>
     private static string GetRelationshipTypeName(INavigationBase navMetadata)
     {
         if (navMetadata is ISkipNavigation) return "SkipNavigation";

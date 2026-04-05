@@ -6,6 +6,10 @@ namespace Diwink.Extensions.EntityFrameworkCore.TestModel.Configurations;
 
 public class TopicTagConfiguration : IEntityTypeConfiguration<TopicTag>
 {
+    /// <summary>
+    /// Configures the EF Core mapping for the TopicTag entity.
+    /// </summary>
+    /// <param name="builder">The EntityTypeBuilder for TopicTag used to configure the primary key, property constraints, and indexes.</param>
     public void Configure(EntityTypeBuilder<TopicTag> builder)
     {
         builder.HasKey(t => t.Id);

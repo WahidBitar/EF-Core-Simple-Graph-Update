@@ -8,6 +8,11 @@ public sealed class AmbiguousOwnershipSemanticsException : GraphUpdateException
 {
     public string MissingDetail { get; }
 
+    /// <summary>
+    /// Creates a new AmbiguousOwnershipSemanticsException for a one-to-one mutation path when requiredness or ownership metadata is ambiguous or missing.
+    /// </summary>
+    /// <param name="relationshipPath">The relationship path where the ambiguous ownership semantics were detected.</param>
+    /// <param name="missingDetail">A specific detail describing the missing metadata that caused the ambiguity.</param>
     public AmbiguousOwnershipSemanticsException(
         string relationshipPath,
         string missingDetail)

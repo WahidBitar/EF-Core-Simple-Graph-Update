@@ -6,6 +6,13 @@ namespace Diwink.Extensions.EntityFrameworkCore.TestModel.Configurations;
 
 public class LearningCatalogConfiguration : IEntityTypeConfiguration<LearningCatalog>
 {
+    /// <summary>
+    /// Configures the EF Core mapping for the LearningCatalog entity.
+    /// </summary>
+    /// <param name="builder">The <see cref="EntityTypeBuilder{LearningCatalog}"/> used to configure keys, properties, and relationships for the LearningCatalog entity.</param>
+    /// <remarks>
+    /// Sets the primary key to <c>Id</c>, requires <c>Name</c> with a maximum length of 200 characters, configures a one-to-many relationship to <c>Courses</c> with cascade delete, and configures a many-to-many relationship to <c>Tags</c> using the join table named "CatalogTopicTag". 
+    /// </remarks>
     public void Configure(EntityTypeBuilder<LearningCatalog> builder)
     {
         builder.HasKey(c => c.Id);
