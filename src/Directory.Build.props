@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <EfCore9Version>[9.0.14,10.0.0)</EfCore9Version>
     <EfCore10Version>[10.0.5,11.0.0)</EfCore10Version>
   </PropertyGroup>

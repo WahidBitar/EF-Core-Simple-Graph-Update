@@ -17,6 +17,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore9Version)" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore9Version)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore10Version)" />
   </ItemGroup>

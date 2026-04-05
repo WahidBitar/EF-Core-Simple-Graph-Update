@@ -1,6 +1,5 @@
 # Digital Wink Entity Framework Extensions
-In this simple project we're going to expose the helper extension methods that we're using in our company.
-and as a starting point we'll start with the Graph update method.
+In this simple project we're going to expose the helper extension methods that we're using in our company, and as a starting point we'll start with the Graph update method.
 We'll update the [Nuget Package](https://www.nuget.org/packages/Diwink.Extensions.EntityFrameworkCore/) whenever we have a new version.
 
 ## Entity Framework Core Simple Graph Update
@@ -12,7 +11,7 @@ Internally the method will update just the eager loaded entities in the aggregat
 
 ## Support (.NET 8-10, EF Core 9-10)
 
-The project was rebuilt to ships new `net10.x.x` assets, so the package
+The project now ships `net8.0`, `net9.0`, and `net10.0` assets, so the package
 supports .NET 8.x through .NET 10.x and EF Core 9.x through 10.x while keeping
 the same explicit, contract-driven relationship semantics.
 
