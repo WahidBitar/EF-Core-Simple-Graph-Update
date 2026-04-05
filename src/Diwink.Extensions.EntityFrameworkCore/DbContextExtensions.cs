@@ -26,7 +26,13 @@ public static class DbContextExtensions
     /// <param name="context">The DbContext tracking the existing entity.</param>
     /// <param name="updatedEntity">Detached entity graph representing desired state.</param>
     /// <param name="existingEntity">Tracked entity graph loaded from the database.</param>
+    /// <summary>
+    /// Synchronizes the tracked entity graph represented by <paramref name="existingEntity"/> so it matches the detached <paramref name="updatedEntity"/> graph.
+    /// </summary>
+    /// <param name="updatedEntity">The detached entity graph containing the desired state.</param>
+    /// <param name="existingEntity">The already-tracked entity graph to be updated to match <paramref name="updatedEntity"/>.</param>
     /// <returns>The updated tracked entity.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="context"/>, <paramref name="updatedEntity"/>, or <paramref name="existingEntity"/> is null.</exception>
     public static T InsertUpdateOrDeleteGraph<T>(
         this DbContext context,
         T updatedEntity,

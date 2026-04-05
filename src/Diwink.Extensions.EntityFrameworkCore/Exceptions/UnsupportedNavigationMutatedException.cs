@@ -9,6 +9,11 @@ public sealed class UnsupportedNavigationMutatedException : GraphUpdateException
 {
     public string RelationshipType { get; }
 
+    /// <summary>
+    /// Initializes a new <see cref="UnsupportedNavigationMutatedException"/> for a detected mutation on a navigation whose relationship type is not supported by the v2 contract.
+    /// </summary>
+    /// <param name="relationshipPath">The navigation path where the mutation was detected.</param>
+    /// <param name="relationshipType">The unsupported relationship type (for example, "one-to-many").</param>
     public UnsupportedNavigationMutatedException(
         string relationshipPath,
         string relationshipType)

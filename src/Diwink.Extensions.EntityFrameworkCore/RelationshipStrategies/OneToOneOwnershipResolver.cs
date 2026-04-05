@@ -16,7 +16,11 @@ internal static class OneToOneOwnershipResolver
     /// <returns>
     /// <c>true</c> if the relationship is required (dependent should be deleted on removal);
     /// <c>false</c> if optional (FK should be nulled on removal).
-    /// </returns>
+    /// <summary>
+    /// Determines whether the dependent end of the specified one-to-one relationship is required.
+    /// </summary>
+    /// <param name="foreignKey">EF Core foreign-key metadata representing the one-to-one relationship.</param>
+    /// <returns>`true` if the dependent is required (cannot be null); `false` if the dependent is optional (foreign key can be nullified).</returns>
     public static bool IsRequiredDependent(IForeignKey foreignKey)
     {
         return foreignKey.IsRequired;

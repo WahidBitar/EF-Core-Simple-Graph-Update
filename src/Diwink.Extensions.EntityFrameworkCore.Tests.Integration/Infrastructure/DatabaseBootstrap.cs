@@ -14,7 +14,11 @@ public static class DatabaseBootstrap
 
     /// <summary>
     /// Creates a fresh DbContext pointing at the container and ensures the schema exists.
+    /// <summary>
+    /// Creates a TestDbContext configured to use SQL Server with a test-specific connection string.
     /// </summary>
+    /// <param name="connectionString">Base SQL Server connection string; if its initial catalog is empty or equals "master", the catalog will be replaced with the test database name.</param>
+    /// <returns>A new TestDbContext configured with the adjusted connection string.</returns>
     public static TestDbContext CreateContext(string connectionString)
     {
         var testConnectionString = GetTestConnectionString(connectionString);
@@ -25,6 +29,11 @@ public static class DatabaseBootstrap
         return new TestDbContext(options);
     }
 
+    /// <summary>
+    /// Ensures the provided SQL Server connection string targets the test database by replacing an empty or "master" Initial Catalog with the test database name.
+    /// </summary>
+    /// <param name="connectionString">A SQL Server connection string to adjust.</param>
+    /// <returns>The connection string with Initial Catalog set to the test database when the original catalog was empty or "master".</returns>
     internal static string GetTestConnectionString(string connectionString)
     {
         var builder = new SqlConnectionStringBuilder(connectionString);
@@ -40,7 +49,10 @@ public static class DatabaseBootstrap
 
     /// <summary>
     /// Ensures the database schema is created. Called once per test collection.
+    /// <summary>
+    /// Ensures the test database schema exists for the provided SQL Server connection string.
     /// </summary>
+    /// <param name="connectionString">SQL Server connection string. If the Initial Catalog is empty or "master", the configured test database name will be used.</param>
     public static async Task EnsureSchemaAsync(string connectionString)
     {
         await using var context = CreateContext(connectionString);
@@ -50,7 +62,10 @@ public static class DatabaseBootstrap
     /// <summary>
     /// Drops and recreates the database schema. Used for test isolation
     /// when a test needs a guaranteed clean slate.
+    /// <summary>
+    /// Deletes and recreates the test database schema for the given connection string.
     /// </summary>
+    /// <param name="connectionString">The database connection string used to locate the server; if the connection string has no catalog or specifies "master", the configured test database name will be used.</param>
     public static async Task ResetSchemaAsync(string connectionString)
     {
         await using var context = CreateContext(connectionString);

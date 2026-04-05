@@ -13,11 +13,19 @@ public class SqlServerContainerFixture : IAsyncLifetime
 
     public string ConnectionString => _container.GetConnectionString();
 
+    /// <summary>
+    /// Starts the SQL Server container used by the fixture.
+    /// </summary>
+    /// <returns>A task that completes when the container has started.</returns>
     public async Task InitializeAsync()
     {
         await _container.StartAsync();
     }
 
+    /// <summary>
+    /// Disposes the SQL Server container and releases its resources.
+    /// </summary>
+    /// <returns>A task that completes when the container has been disposed.</returns>
     public async Task DisposeAsync()
     {
         await _container.DisposeAsync().AsTask();

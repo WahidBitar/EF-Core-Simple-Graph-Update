@@ -7,6 +7,11 @@ public sealed class UnsupportedRelationshipPatternException : GraphUpdateExcepti
 {
     public string PatternIdentifier { get; }
 
+    /// <summary>
+    /// Initializes a new <see cref="UnsupportedRelationshipPatternException"/> for a mutation that relies on a relationship pattern not supported by the v2 contract.
+    /// </summary>
+    /// <param name="relationshipPath">The relationship path where the unsupported pattern was encountered.</param>
+    /// <param name="patternIdentifier">The identifier of the unsupported relationship pattern.</param>
     public UnsupportedRelationshipPatternException(
         string relationshipPath,
         string patternIdentifier)

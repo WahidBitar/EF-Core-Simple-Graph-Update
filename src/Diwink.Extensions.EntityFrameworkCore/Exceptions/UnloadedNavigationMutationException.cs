@@ -7,6 +7,11 @@ public sealed class UnloadedNavigationMutationException : GraphUpdateException
 {
     public string NavigationName { get; }
 
+    /// <summary>
+    /// Initializes a new exception indicating a mutation relied on a navigation that was not explicitly loaded.
+    /// </summary>
+    /// <param name="relationshipPath">The relationship path identifying where the mutation was requested.</param>
+    /// <param name="navigationName">The name of the navigation property that was required but not loaded.</param>
     public UnloadedNavigationMutationException(
         string relationshipPath,
         string navigationName)

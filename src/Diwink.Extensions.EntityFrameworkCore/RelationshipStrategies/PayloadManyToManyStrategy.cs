@@ -11,6 +11,16 @@ namespace Diwink.Extensions.EntityFrameworkCore.RelationshipStrategies;
 /// </summary>
 internal static class PayloadManyToManyStrategy
 {
+    /// <summary>
+    /// Synchronizes a payload-based many-to-many collection navigation so its association entities match the provided target collection.
+    /// </summary>
+    /// <remarks>
+    /// Removes association entities that are not present in <paramref name="updatedCollection"/>, updates payload values on matching tracked associations, and adds new association entities to the navigation when no tracked match exists. Deleting an association entity only removes the association row; related non-association entities are not deleted.
+    /// </remarks>
+    /// <param name="context">The DbContext used to inspect entity keys and apply changes.</param>
+    /// <param name="existingNavigation">The collection navigation that currently holds the association entities (may be null/empty).</param>
+    /// <param name="updatedCollection">The desired collection of association entity instances to reconcile the navigation with.</param>
+    /// <exception cref="System.InvalidOperationException">Thrown if the navigation's current collection value is null or does not expose a public Add method when attempting to add a new association entity.</exception>
     public static void Apply(
         DbContext context,
         CollectionEntry existingNavigation,
@@ -51,6 +61,12 @@ internal static class PayloadManyToManyStrategy
         }
     }
 
+    /// <summary>
+    /// Finds the first object in the trackedItems whose entity key values match the provided targetKeys.
+    /// </summary>
+    /// <param name="trackedItems">List of currently tracked entity instances to search for a key match.</param>
+    /// <param name="targetKeys">Array of key values to match against each tracked item's entity key.</param>
+    /// <returns>The first tracked item whose key values equal <paramref name="targetKeys"/>, or <c>null</c> if no match is found.</returns>
     private static object? FindInTracked(
         DbContext context,
         List<object> trackedItems,
@@ -65,6 +81,14 @@ internal static class PayloadManyToManyStrategy
         return null;
     }
 
+    /// <summary>
+    /// Adds an association entity instance to the specified collection navigation.
+    /// </summary>
+    /// <param name="navigation">The collection navigation whose underlying collection will receive the item.</param>
+    /// <param name="item">The association entity instance to add to the collection.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the navigation's current collection value is null or if the collection type does not expose a public Add method.
+    /// </exception>
     private static void AddToCollection(CollectionEntry navigation, object item)
     {
         var currentValue = navigation.CurrentValue ?? throw new InvalidOperationException(

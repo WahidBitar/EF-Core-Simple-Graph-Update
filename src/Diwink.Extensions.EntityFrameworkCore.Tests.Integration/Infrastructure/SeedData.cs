@@ -22,7 +22,10 @@ public static class SeedData
 
     /// <summary>
     /// Seeds a complete test scenario with all relationship types represented.
+    /// <summary>
+    /// Seeds the provided test database with a complete, deterministic integration scenario: three topic tags, two mentors (one with a workspace), a learning catalog containing two courses with policies, tag associations, and a mentor assignment for the first course, then saves the changes to the context.
     /// </summary>
+    /// <param name="context">The TestDbContext to which seeded entities are added and persisted.</param>
     public static async Task SeedFullScenarioAsync(TestDbContext context)
     {
         var tag1 = new TopicTag { Id = Tag1Id, Label = "Architecture" };
