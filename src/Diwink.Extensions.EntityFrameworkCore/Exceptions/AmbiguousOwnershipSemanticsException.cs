@@ -16,6 +16,6 @@ public sealed class AmbiguousOwnershipSemanticsException : GraphUpdateException
             "The contract requires explicit requiredness/ownership metadata.",
             relationshipPath)
     {
-        MissingDetail = missingDetail;
+        MissingDetail = ValidateAndNormalize(missingDetail, nameof(missingDetail), "Missing detail");
     }
 }

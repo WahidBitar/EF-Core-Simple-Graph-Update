@@ -11,6 +11,9 @@ namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure
 public static class DatabaseBootstrap
 {
     internal const string TestDatabaseName = "DiwinkEfCoreGraphUpdateTests";
+    private const int SchemaOperationMaxAttempts = 3;
+    private static readonly TimeSpan SchemaOperationTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan SchemaOperationRetryDelay = TimeSpan.FromSeconds(2);
 
     /// <summary>
     /// Creates a fresh DbContext pointing at the container and ensures the schema exists.
@@ -43,8 +46,10 @@ public static class DatabaseBootstrap
     /// </summary>
     public static async Task EnsureSchemaAsync(string connectionString)
     {
-        await using var context = CreateContext(connectionString);
-        await context.Database.EnsureCreatedAsync();
+        await ExecuteSchemaOperationWithRetryAsync(
+            connectionString,
+            "ensure the test schema exists",
+            static (context, cancellationToken) => context.Database.EnsureCreatedAsync(cancellationToken));
     }
 
     /// <summary>
@@ -53,8 +58,54 @@ public static class DatabaseBootstrap
     /// </summary>
     public static async Task ResetSchemaAsync(string connectionString)
     {
-        await using var context = CreateContext(connectionString);
-        await context.Database.EnsureDeletedAsync();
-        await context.Database.EnsureCreatedAsync();
+        await ExecuteSchemaOperationWithRetryAsync(
+            connectionString,
+            "reset the test schema",
+            static async (context, cancellationToken) =>
+            {
+                await context.Database.EnsureDeletedAsync(cancellationToken);
+                await context.Database.EnsureCreatedAsync(cancellationToken);
+            });
+    }
+
+    private static async Task ExecuteSchemaOperationWithRetryAsync(
+        string connectionString,
+        string operationName,
+        Func<TestDbContext, CancellationToken, Task> operation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+
+        Exception? lastException = null;
+
+        for (var attempt = 1; attempt <= SchemaOperationMaxAttempts; attempt++)
+        {
+            using var cancellationSource = new CancellationTokenSource(SchemaOperationTimeout);
+
+            try
+            {
+                await using var context = CreateContext(connectionString);
+                await operation(context, cancellationSource.Token);
+                return;
+            }
+            catch (Exception ex) when (IsRetryableSchemaException(ex, cancellationSource))
+            {
+                lastException = ex;
+
+                if (attempt == SchemaOperationMaxAttempts)
+                    break;
+
+                await Task.Delay(SchemaOperationRetryDelay);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Failed to {operationName} after {SchemaOperationMaxAttempts} attempts.",
+            lastException);
+    }
+
+    private static bool IsRetryableSchemaException(Exception exception, CancellationTokenSource cancellationSource)
+    {
+        return exception is SqlException or TimeoutException or InvalidOperationException ||
+               (cancellationSource.IsCancellationRequested && exception is OperationCanceledException);
     }
 }

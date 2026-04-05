@@ -19,6 +19,7 @@ internal static class OneToOneOwnershipResolver
     /// </returns>
     public static bool IsRequiredDependent(IForeignKey foreignKey)
     {
+        ArgumentNullException.ThrowIfNull(foreignKey);
         return foreignKey.IsRequired;
     }
 }

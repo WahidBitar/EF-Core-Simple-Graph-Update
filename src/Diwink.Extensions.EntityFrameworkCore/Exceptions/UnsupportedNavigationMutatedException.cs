@@ -19,6 +19,6 @@ public sealed class UnsupportedNavigationMutatedException : GraphUpdateException
             "Unchanged unsupported navigations would have been silently skipped.",
             relationshipPath)
     {
-        RelationshipType = relationshipType;
+        RelationshipType = ValidateAndNormalize(relationshipType, nameof(relationshipType), "Relationship type");
     }
 }

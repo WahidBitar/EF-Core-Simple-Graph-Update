@@ -15,6 +15,6 @@ public sealed class UnsupportedRelationshipPatternException : GraphUpdateExcepti
             "See the v2 contract documentation for supported patterns.",
             relationshipPath)
     {
-        PatternIdentifier = patternIdentifier;
+        PatternIdentifier = ValidateAndNormalize(patternIdentifier, nameof(patternIdentifier), "Pattern identifier");
     }
 }

@@ -57,7 +57,12 @@ internal static class PureManyToManyStrategy
                     if (knownEntity is not null)
                     {
                         // Entity exists — update properties and create link
-                        context.Entry(knownEntity).CurrentValues.SetValues(updatedItem);
+                        var knownEntityEntry = context.Entry(knownEntity);
+                        if (knownEntityEntry.State is EntityState.Unchanged or EntityState.Detached)
+                        {
+                            knownEntityEntry.CurrentValues.SetValues(updatedItem);
+                        }
+
                         AddToCollection(existingNavigation, knownEntity);
                     }
                     else

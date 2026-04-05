@@ -16,6 +16,6 @@ public sealed class PartialMutationNotAllowedException : GraphUpdateException
             "The entire operation was rejected — partial mutation is not allowed.",
             relationshipPath)
     {
-        UnsupportedBranch = unsupportedBranch;
+        UnsupportedBranch = ValidateAndNormalize(unsupportedBranch, nameof(unsupportedBranch), "Unsupported branch");
     }
 }

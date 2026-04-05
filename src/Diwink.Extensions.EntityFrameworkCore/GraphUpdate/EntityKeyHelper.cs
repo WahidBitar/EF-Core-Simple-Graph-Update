@@ -28,13 +28,16 @@ internal static class EntityKeyHelper
     /// </summary>
     public static object[] GetKeyValues(DbContext context, object entity)
     {
-        var entityType = context.Model.FindEntityType(entity.GetType());
-        if (entityType is null)
-            return [];
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(entity);
 
-        var primaryKey = entityType.FindPrimaryKey();
-        if (primaryKey is null)
-            return [];
+        var entityType = context.Model.FindEntityType(entity.GetType())
+            ?? throw new InvalidOperationException(
+                $"Entity type '{entity.GetType().FullName}' does not exist in the current DbContext model.");
+
+        var primaryKey = entityType.FindPrimaryKey()
+            ?? throw new InvalidOperationException(
+                $"Entity '{entityType.ClrType.Name}' does not define a primary key.");
 
         return primaryKey.Properties
             .Select(p => GetRequiredDetachedKeyValue(entityType, p, entity))
@@ -46,7 +49,33 @@ internal static class EntityKeyHelper
     /// </summary>
     public static bool KeysEqual(object[] keys1, object[] keys2)
     {
-        return keys1.SequenceEqual(keys2);
+        ArgumentNullException.ThrowIfNull(keys1);
+        ArgumentNullException.ThrowIfNull(keys2);
+
+        if (keys1.Length != keys2.Length)
+            return false;
+
+        for (var index = 0; index < keys1.Length; index++)
+        {
+            var left = keys1[index];
+            var right = keys2[index];
+
+            if (left is byte[] leftBytes && right is byte[] rightBytes)
+            {
+                if (!leftBytes.AsSpan().SequenceEqual(rightBytes))
+                    return false;
+
+                continue;
+            }
+
+            if (left is byte[] || right is byte[])
+                return false;
+
+            if (!Equals(left, right))
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>

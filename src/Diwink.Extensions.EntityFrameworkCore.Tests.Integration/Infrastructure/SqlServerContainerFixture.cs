@@ -8,7 +8,9 @@ namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure
 /// </summary>
 public class SqlServerContainerFixture : IAsyncLifetime
 {
-    private readonly MsSqlContainer _container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
+    internal const string DefaultSqlServerImage = "mcr.microsoft.com/mssql/server:2022-CU10-ubuntu-20.04";
+
+    private readonly MsSqlContainer _container = new MsSqlBuilder(GetSqlServerImage())
         .Build();
 
     public string ConnectionString => _container.GetConnectionString();
@@ -21,5 +23,13 @@ public class SqlServerContainerFixture : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await _container.DisposeAsync().AsTask();
+    }
+
+    private static string GetSqlServerImage()
+    {
+        var configuredImage = Environment.GetEnvironmentVariable("SQL_SERVER_IMAGE");
+        return string.IsNullOrWhiteSpace(configuredImage)
+            ? DefaultSqlServerImage
+            : configuredImage.Trim();
     }
 }

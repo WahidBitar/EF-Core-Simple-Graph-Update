@@ -16,6 +16,9 @@ internal static class RequiredOneToOneStrategy
     /// </summary>
     public static void RemoveDependent(DbContext context, ReferenceEntry existingNavigation)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(existingNavigation);
+
         var existingValue = existingNavigation.CurrentValue;
         if (existingValue is null)
             return;

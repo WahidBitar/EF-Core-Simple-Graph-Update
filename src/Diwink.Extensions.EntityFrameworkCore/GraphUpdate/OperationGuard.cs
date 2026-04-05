@@ -1,4 +1,5 @@
 using Diwink.Extensions.EntityFrameworkCore.Exceptions;
+using System.Collections.ObjectModel;
 
 namespace Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 
@@ -10,10 +11,16 @@ namespace Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 internal sealed class OperationGuard
 {
     private readonly List<GraphUpdateException> _errors = [];
+    private readonly ReadOnlyCollection<GraphUpdateException> _readonlyErrors;
+
+    public OperationGuard()
+    {
+        _readonlyErrors = _errors.AsReadOnly();
+    }
 
     public bool HasErrors => _errors.Count > 0;
 
-    public IReadOnlyList<GraphUpdateException> Errors => _errors;
+    public IReadOnlyList<GraphUpdateException> Errors => _readonlyErrors;
 
     /// <summary>
     /// Records a validation error. No mutations should be applied until

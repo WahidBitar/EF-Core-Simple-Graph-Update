@@ -67,6 +67,7 @@ public class OperationGuardTests
         guard.AddError(new UnsupportedRelationshipPatternException("C.D", "Custom"));
 
         guard.Errors.Should().HaveCount(2);
+        guard.Errors.Should().NotBeAssignableTo<List<GraphUpdateException>>();
     }
 
     [Fact]

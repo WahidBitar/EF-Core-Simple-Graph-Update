@@ -292,7 +292,18 @@ internal static class GraphUpdateOrchestrator
         var allKeyPropsAreFk = primaryKey.Properties.All(keyProp =>
             foreignKeys.Any(fk => fk.Properties.Contains(keyProp)));
 
-        return allKeyPropsAreFk;
+        if (!allKeyPropsAreFk)
+            return false;
+
+        var foreignKeyProperties = foreignKeys
+            .SelectMany(fk => fk.Properties)
+            .ToHashSet();
+
+        var hasPayloadProperty = entityType.GetProperties().Any(property =>
+            !primaryKey.Properties.Contains(property) &&
+            !foreignKeyProperties.Contains(property));
+
+        return hasPayloadProperty;
     }
 
     /// <summary>

@@ -17,6 +17,9 @@ internal static class OptionalOneToOneStrategy
     /// </summary>
     public static void DetachDependent(DbContext context, ReferenceEntry existingNavigation)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(existingNavigation);
+
         var existingValue = existingNavigation.CurrentValue;
         if (existingValue is null)
             return;
@@ -32,6 +35,10 @@ internal static class OptionalOneToOneStrategy
     /// </summary>
     public static void AttachDependent(DbContext context, ReferenceEntry existingNavigation, object dependent)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(existingNavigation);
+        ArgumentNullException.ThrowIfNull(dependent);
+
         var dependentEntry = context.Entry(dependent);
         if (dependentEntry.State == EntityState.Detached)
         {
@@ -47,6 +54,10 @@ internal static class OptionalOneToOneStrategy
     /// </summary>
     public static void ReplaceDependent(DbContext context, ReferenceEntry existingNavigation, object dependent)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(existingNavigation);
+        ArgumentNullException.ThrowIfNull(dependent);
+
         DetachDependent(context, existingNavigation);
         AttachDependent(context, existingNavigation, dependent);
     }

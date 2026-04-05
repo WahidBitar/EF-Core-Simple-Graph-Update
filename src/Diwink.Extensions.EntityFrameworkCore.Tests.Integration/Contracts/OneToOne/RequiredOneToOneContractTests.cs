@@ -31,7 +31,6 @@ public class RequiredOneToOneContractTests : IntegrationTestBase
             .FirstAsync(c => c.Id == SeedData.Course1Id);
 
         existing.Policy.Should().NotBeNull("seed data includes a CoursePolicy");
-        var policyVersion = existing.Policy!.PolicyVersion;
 
         // Updated graph removes the Policy reference
         var updated = new Course

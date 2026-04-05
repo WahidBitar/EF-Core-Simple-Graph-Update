@@ -1,3 +1,4 @@
+using System.Collections;
 using Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -70,7 +71,25 @@ internal static class PayloadManyToManyStrategy
         var currentValue = navigation.CurrentValue ?? throw new InvalidOperationException(
             $"Collection navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' is null; cannot add item type '{item.GetType().FullName}'.");
 
-        var addMethod = currentValue.GetType().GetMethod("Add") ?? throw new InvalidOperationException(
+        if (currentValue is IList list)
+        {
+            list.Add(item);
+            return;
+        }
+
+        var collectionInterface = currentValue.GetType().GetInterfaces()
+            .FirstOrDefault(i =>
+                i.IsGenericType &&
+                i.GetGenericTypeDefinition() == typeof(ICollection<>) &&
+                i.GenericTypeArguments[0].IsAssignableFrom(item.GetType()));
+
+        if (collectionInterface is null)
+        {
+            throw new InvalidOperationException(
+                $"Collection type '{currentValue.GetType().FullName}' for navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' does not expose a public Add method for item type '{item.GetType().FullName}'.");
+        }
+
+        var addMethod = collectionInterface.GetMethod(nameof(ICollection<object>.Add)) ?? throw new InvalidOperationException(
             $"Collection type '{currentValue.GetType().FullName}' for navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' does not expose a public Add method for item type '{item.GetType().FullName}'.");
 
         addMethod.Invoke(currentValue, [item]);
