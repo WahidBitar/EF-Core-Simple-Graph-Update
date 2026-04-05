@@ -43,13 +43,23 @@ internal static class GraphUpdateOrchestrator
         EntityEntry existingEntry,
         object updatedEntity,
         Type aggregateType,
-        OperationGuard guard)
+        OperationGuard guard,
+        HashSet<object>? recursionPath = null)
     {
+        recursionPath ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!recursionPath.Add(existingEntry.Entity))
+            return;
+
+        try
+        {
         // Check loaded navigations for unsupported mutations
         foreach (var navigation in existingEntry.Navigations
             .Where(n => n.IsLoaded))
         {
             var navMetadata = navigation.Metadata;
+            if (IsNavigationBackToAggregateRoot(navMetadata, aggregateType))
+                continue;
+
             var entityPath = $"{existingEntry.Metadata.ClrType.Name}.{navMetadata.Name}";
 
             var classification = ClassifyNavigation(navMetadata);
@@ -64,7 +74,16 @@ internal static class GraphUpdateOrchestrator
                         GetRelationshipTypeName(navMetadata)));
                 }
                 // else: silently skip (FR-019)
+                continue;
             }
+
+            ValidateLoadedChildren(
+                context,
+                navigation,
+                updatedEntity,
+                aggregateType,
+                guard,
+                recursionPath);
         }
 
         // FR-015/FR-016: Check unloaded navigations for attempted mutations
@@ -73,9 +92,7 @@ internal static class GraphUpdateOrchestrator
         {
             var navMetadata = navigation.Metadata;
 
-            // Skip navigations pointing back to the aggregate root
-            if (navMetadata is INavigation nav &&
-                nav.TargetEntityType.ClrType == aggregateType)
+            if (IsNavigationBackToAggregateRoot(navMetadata, aggregateType))
                 continue;
 
             var entityPath = $"{existingEntry.Metadata.ClrType.Name}.{navMetadata.Name}";
@@ -86,6 +103,11 @@ internal static class GraphUpdateOrchestrator
                     entityPath,
                     navMetadata.Name));
             }
+        }
+        }
+        finally
+        {
+            recursionPath.Remove(existingEntry.Entity);
         }
     }
 
@@ -114,7 +136,7 @@ internal static class GraphUpdateOrchestrator
         return true;
     }
 
-    private static void ApplyNavigations(
+    internal static void ApplyNavigations(
         DbContext context,
         EntityEntry existingEntry,
         object updatedEntity,
@@ -124,26 +146,21 @@ internal static class GraphUpdateOrchestrator
             .Where(n => n.IsLoaded))
         {
             var navMetadata = navigation.Metadata;
+            if (IsNavigationBackToAggregateRoot(navMetadata, aggregateType))
+                continue;
+
             var classification = ClassifyNavigation(navMetadata);
 
             // Skip unsupported navigations (already validated, no mutations)
             if (classification == NavigationClassification.Unsupported)
                 continue;
 
-            // Skip navigations pointing back to the aggregate root
-            if (navMetadata.ClrType.FullName == aggregateType.FullName ||
-                (navMetadata is INavigation nav && nav.TargetEntityType.ClrType == aggregateType))
+            if (!TryGetUpdatedNavigationValue(updatedEntity, navMetadata, out var updatedValue))
                 continue;
-
-            var navProperty = updatedEntity.GetType().GetProperty(navMetadata.Name);
-            if (navProperty is null)
-                continue;
-
-            var updatedValue = navProperty.GetValue(updatedEntity);
 
             if (navigation is CollectionEntry collectionEntry)
             {
-                ApplyCollectionNavigation(context, collectionEntry, updatedValue, classification, aggregateType);
+                ApplyCollectionNavigation(context, collectionEntry, updatedValue, classification);
             }
             else if (navigation is ReferenceEntry referenceEntry)
             {
@@ -156,8 +173,7 @@ internal static class GraphUpdateOrchestrator
         DbContext context,
         CollectionEntry existingNavigation,
         object? updatedValue,
-        NavigationClassification classification,
-        Type aggregateType)
+        NavigationClassification classification)
     {
         var updatedCollection = updatedValue as IEnumerable<object> ?? [];
 
@@ -188,6 +204,13 @@ internal static class GraphUpdateOrchestrator
 
         if (updatedValue is not null && existingValue is not null)
         {
+            if (classification == NavigationClassification.OptionalOneToOne &&
+                !ReferenceKeysMatch(context, existingValue, updatedValue))
+            {
+                OptionalOneToOneStrategy.ReplaceDependent(context, existingNavigation, updatedValue);
+                return;
+            }
+
             // Update existing reference — scalars + nested navigations
             var childEntry = context.Entry(existingValue);
             RelatedEntityMutationService.UpdateScalarProperties(childEntry, updatedValue);
@@ -195,6 +218,12 @@ internal static class GraphUpdateOrchestrator
         }
         else if (updatedValue is not null && existingValue is null)
         {
+            if (classification == NavigationClassification.OptionalOneToOne)
+            {
+                OptionalOneToOneStrategy.AttachDependent(context, existingNavigation, updatedValue);
+                return;
+            }
+
             // Add new reference
             existingNavigation.CurrentValue = updatedValue;
         }
@@ -276,11 +305,8 @@ internal static class GraphUpdateOrchestrator
         object updatedEntity,
         INavigationBase navMetadata)
     {
-        var navProperty = updatedEntity.GetType().GetProperty(navMetadata.Name);
-        if (navProperty is null)
+        if (!TryGetUpdatedNavigationValue(updatedEntity, navMetadata, out var updatedValue))
             return false;
-
-        var updatedValue = navProperty.GetValue(updatedEntity);
 
         if (navigation is CollectionEntry collectionEntry)
         {
@@ -296,6 +322,9 @@ internal static class GraphUpdateOrchestrator
                 var existingKeys = EntityKeyHelper.GetKeyValues(context.Entry(existingItem));
                 var match = EntityKeyHelper.FindByKey(context, updatedItems, existingKeys);
                 if (match is null)
+                    return true;
+
+                if (HasScalarDifferences(context.Entry(existingItem), match))
                     return true;
             }
 
@@ -313,10 +342,109 @@ internal static class GraphUpdateOrchestrator
             // Both non-null — check if keys match
             var existingKeys = EntityKeyHelper.GetKeyValues(context.Entry(existingValue));
             var updatedKeys = EntityKeyHelper.GetKeyValues(context, updatedValue);
-            return !EntityKeyHelper.KeysEqual(existingKeys, updatedKeys);
+            if (!EntityKeyHelper.KeysEqual(existingKeys, updatedKeys))
+                return true;
+
+            return HasScalarDifferences(context.Entry(existingValue), updatedValue);
         }
 
         return false;
+    }
+
+    private static void ValidateLoadedChildren(
+        DbContext context,
+        NavigationEntry navigation,
+        object updatedEntity,
+        Type aggregateType,
+        OperationGuard guard,
+        HashSet<object> recursionPath)
+    {
+        if (!TryGetUpdatedNavigationValue(updatedEntity, navigation.Metadata, out var updatedValue) ||
+            updatedValue is null)
+        {
+            return;
+        }
+
+        if (navigation is ReferenceEntry referenceEntry &&
+            referenceEntry.CurrentValue is not null)
+        {
+            ValidateNavigations(
+                context,
+                context.Entry(referenceEntry.CurrentValue),
+                updatedValue,
+                aggregateType,
+                guard,
+                recursionPath);
+            return;
+        }
+
+        if (navigation is not CollectionEntry collectionEntry ||
+            updatedValue is not IEnumerable<object> updatedCollection)
+        {
+            return;
+        }
+
+        var updatedItems = updatedCollection.ToList();
+        var existingItems = collectionEntry.CurrentValue?.Cast<object>() ?? [];
+
+        foreach (var existingItem in existingItems)
+        {
+            var existingKeys = EntityKeyHelper.GetKeyValues(context.Entry(existingItem));
+            var match = EntityKeyHelper.FindByKey(context, updatedItems, existingKeys);
+            if (match is null)
+                continue;
+
+            ValidateNavigations(
+                context,
+                context.Entry(existingItem),
+                match,
+                aggregateType,
+                guard,
+                recursionPath);
+        }
+    }
+
+    private static bool TryGetUpdatedNavigationValue(
+        object updatedEntity,
+        INavigationBase navMetadata,
+        out object? updatedValue)
+    {
+        var navProperty = updatedEntity.GetType().GetProperty(navMetadata.Name);
+        if (navProperty is null)
+        {
+            updatedValue = null;
+            return false;
+        }
+
+        updatedValue = navProperty.GetValue(updatedEntity);
+        return true;
+    }
+
+    private static bool HasScalarDifferences(EntityEntry existingEntry, object updatedEntity)
+    {
+        foreach (var property in existingEntry.Metadata.GetProperties()
+            .Where(p => !p.IsShadowProperty()))
+        {
+            var existingValue = existingEntry.Property(property.Name).CurrentValue;
+            var updatedValue = EntityKeyHelper.ReadDetachedPropertyValue(property, updatedEntity);
+            if (!Equals(existingValue, updatedValue))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ReferenceKeysMatch(DbContext context, object existingValue, object updatedValue)
+    {
+        var existingKeys = EntityKeyHelper.GetKeyValues(context.Entry(existingValue));
+        var updatedKeys = EntityKeyHelper.GetKeyValues(context, updatedValue);
+        return EntityKeyHelper.KeysEqual(existingKeys, updatedKeys);
+    }
+
+    private static bool IsNavigationBackToAggregateRoot(INavigationBase navMetadata, Type aggregateType)
+    {
+        return navMetadata is INavigation nav &&
+               nav.TargetEntityType.ClrType == aggregateType;
     }
 
     private static string GetRelationshipTypeName(INavigationBase navMetadata)

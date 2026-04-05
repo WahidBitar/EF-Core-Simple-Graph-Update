@@ -68,4 +68,15 @@ public class OperationGuardTests
 
         guard.Errors.Should().HaveCount(2);
     }
+
+    [Fact]
+    public void AddError_with_null_throws_ArgumentNullException()
+    {
+        var guard = new OperationGuard();
+
+        var act = () => guard.AddError(null!);
+
+        act.Should().Throw<ArgumentNullException>()
+            .Which.ParamName.Should().Be("error");
+    }
 }

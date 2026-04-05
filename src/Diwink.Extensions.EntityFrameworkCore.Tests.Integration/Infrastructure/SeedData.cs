@@ -5,7 +5,7 @@ namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure
 
 /// <summary>
 /// Deterministic seed data used across integration contract tests.
-/// Each seed method returns the IDs of created entities for test assertions.
+/// Exposes well-known IDs for assertions and seeds complete test scenarios.
 /// </summary>
 public static class SeedData
 {

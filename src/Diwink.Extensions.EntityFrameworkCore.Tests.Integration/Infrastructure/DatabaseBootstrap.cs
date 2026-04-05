@@ -1,4 +1,5 @@
 using Diwink.Extensions.EntityFrameworkCore.TestModel;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure;
@@ -9,16 +10,32 @@ namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure
 /// </summary>
 public static class DatabaseBootstrap
 {
+    internal const string TestDatabaseName = "DiwinkEfCoreGraphUpdateTests";
+
     /// <summary>
     /// Creates a fresh DbContext pointing at the container and ensures the schema exists.
     /// </summary>
     public static TestDbContext CreateContext(string connectionString)
     {
+        var testConnectionString = GetTestConnectionString(connectionString);
         var options = new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlServer(connectionString)
+            .UseSqlServer(testConnectionString)
             .Options;
 
         return new TestDbContext(options);
+    }
+
+    internal static string GetTestConnectionString(string connectionString)
+    {
+        var builder = new SqlConnectionStringBuilder(connectionString);
+
+        if (string.IsNullOrWhiteSpace(builder.InitialCatalog) ||
+            string.Equals(builder.InitialCatalog, "master", StringComparison.OrdinalIgnoreCase))
+        {
+            builder.InitialCatalog = TestDatabaseName;
+        }
+
+        return builder.ConnectionString;
     }
 
     /// <summary>

@@ -134,4 +134,31 @@ public class UnsupportedRelationshipPatternTests : IntegrationTestBase
         var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
         act.Should().Throw<UnsupportedNavigationMutatedException>();
     }
+
+    [Fact]
+    public async Task In_place_scalar_edit_in_unsupported_one_to_many_is_rejected()
+    {
+        await using var ctx = CreateContext();
+        var existing = await ctx.LearningCatalogs
+            .Include(c => c.Courses)
+            .FirstAsync(c => c.Id == SeedData.CatalogId);
+
+        var updated = new LearningCatalog
+        {
+            Id = SeedData.CatalogId,
+            Name = existing.Name,
+            Courses = existing.Courses.Select(c => new Course
+            {
+                Id = c.Id,
+                CatalogId = c.CatalogId,
+                Title = c.Id == SeedData.Course1Id ? "Retitled Course" : c.Title,
+                Code = c.Code
+            }).ToList()
+        };
+
+        var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+
+        act.Should().Throw<UnsupportedNavigationMutatedException>()
+            .Which.RelationshipPath.Should().Be("LearningCatalog.Courses");
+    }
 }

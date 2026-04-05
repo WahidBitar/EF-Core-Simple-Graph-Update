@@ -17,6 +17,18 @@ internal static class NavigationLoadGuard
     /// </summary>
     public static void EnsureNavigationsLoaded(EntityEntry existingEntry)
     {
+        EnsureNavigationsLoaded(
+            existingEntry,
+            new HashSet<object>(ReferenceEqualityComparer.Instance));
+    }
+
+    private static void EnsureNavigationsLoaded(
+        EntityEntry existingEntry,
+        HashSet<object> visited)
+    {
+        if (!visited.Add(existingEntry.Entity))
+            return;
+
         foreach (var navigation in existingEntry.Navigations)
         {
             if (!navigation.IsLoaded)
@@ -28,13 +40,13 @@ internal static class NavigationLoadGuard
                 foreach (var child in collectionEntry.CurrentValue.Cast<object>())
                 {
                     var childEntry = existingEntry.Context.Entry(child);
-                    EnsureNavigationsLoaded(childEntry);
+                    EnsureNavigationsLoaded(childEntry, visited);
                 }
             }
             else if (navigation is ReferenceEntry referenceEntry && referenceEntry.CurrentValue is not null)
             {
                 var childEntry = existingEntry.Context.Entry(referenceEntry.CurrentValue);
-                EnsureNavigationsLoaded(childEntry);
+                EnsureNavigationsLoaded(childEntry, visited);
             }
         }
     }

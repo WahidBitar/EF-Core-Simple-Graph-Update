@@ -25,7 +25,7 @@ dbContext.SaveChanges();
 
 ## v2 Rebuild (EF Core 10+)
 
-The v2 rebuild (`src-v2/`) targets .NET 10 and EF Core 10.x with explicit,
+The v2 rebuild (`src/`) targets .NET 10 and EF Core 10.x with explicit,
 contract-driven relationship semantics.
 
 ### Supported Relationship Patterns

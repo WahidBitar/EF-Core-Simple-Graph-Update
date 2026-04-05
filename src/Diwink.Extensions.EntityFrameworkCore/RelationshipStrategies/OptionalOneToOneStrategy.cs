@@ -25,4 +25,29 @@ internal static class OptionalOneToOneStrategy
         // because the FK has DeleteBehavior.SetNull configured
         existingNavigation.CurrentValue = null;
     }
+
+    /// <summary>
+    /// Attaches a new optional dependent to the navigation and ensures EF Core
+    /// treats it as an insert when it is not already tracked.
+    /// </summary>
+    public static void AttachDependent(DbContext context, ReferenceEntry existingNavigation, object dependent)
+    {
+        var dependentEntry = context.Entry(dependent);
+        if (dependentEntry.State == EntityState.Detached)
+        {
+            dependentEntry.State = EntityState.Added;
+        }
+
+        existingNavigation.CurrentValue = dependent;
+    }
+
+    /// <summary>
+    /// Replaces the current optional dependent by detaching the old row and
+    /// linking a new dependent instance.
+    /// </summary>
+    public static void ReplaceDependent(DbContext context, ReferenceEntry existingNavigation, object dependent)
+    {
+        DetachDependent(context, existingNavigation);
+        AttachDependent(context, existingNavigation, dependent);
+    }
 }

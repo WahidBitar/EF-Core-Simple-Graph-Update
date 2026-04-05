@@ -21,6 +21,7 @@ internal sealed class OperationGuard
     /// </summary>
     public void AddError(GraphUpdateException error)
     {
+        ArgumentNullException.ThrowIfNull(error);
         _errors.Add(error);
     }
 

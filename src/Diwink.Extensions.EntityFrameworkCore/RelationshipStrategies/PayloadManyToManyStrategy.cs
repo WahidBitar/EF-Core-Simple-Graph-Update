@@ -20,7 +20,7 @@ internal static class PayloadManyToManyStrategy
         var updatedItems = updatedCollection.ToList();
 
         // Remove association entities not present in updated collection
-        foreach (var existingItem in existingItems.ToList())
+        foreach (var existingItem in existingItems)
         {
             var existingKeys = EntityKeyHelper.GetKeyValues(context.Entry(existingItem));
             var match = EntityKeyHelper.FindByKey(context, updatedItems, existingKeys);
@@ -67,7 +67,12 @@ internal static class PayloadManyToManyStrategy
 
     private static void AddToCollection(CollectionEntry navigation, object item)
     {
-        var addMethod = navigation.CurrentValue!.GetType().GetMethod("Add");
-        addMethod?.Invoke(navigation.CurrentValue, [item]);
+        var currentValue = navigation.CurrentValue ?? throw new InvalidOperationException(
+            $"Collection navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' is null; cannot add item type '{item.GetType().FullName}'.");
+
+        var addMethod = currentValue.GetType().GetMethod("Add") ?? throw new InvalidOperationException(
+            $"Collection type '{currentValue.GetType().FullName}' for navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' does not expose a public Add method for item type '{item.GetType().FullName}'.");
+
+        addMethod.Invoke(currentValue, [item]);
     }
 }

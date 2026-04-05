@@ -33,6 +33,10 @@ public static class DbContextExtensions
         T existingEntity)
         where T : class
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(updatedEntity);
+        ArgumentNullException.ThrowIfNull(existingEntity);
+
         return GraphUpdateOrchestrator.UpdateGraph(context, updatedEntity, existingEntity);
     }
 }

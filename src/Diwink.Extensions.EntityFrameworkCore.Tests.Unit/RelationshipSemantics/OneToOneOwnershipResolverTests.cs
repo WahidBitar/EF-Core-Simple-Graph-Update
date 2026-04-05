@@ -146,6 +146,189 @@ public class OneToOneOwnershipResolverTests
     }
 
     [Fact]
+    public async Task Optional_one_to_one_update_with_same_key_updates_in_place()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var mentorId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        {
+            await using var seedCtx = CreateInMemoryContext(dbName);
+            seedCtx.Mentors.Add(new Mentor
+            {
+                Id = mentorId,
+                DisplayName = "M1",
+                Status = "Active",
+                Workspace = new MentorWorkspace
+                {
+                    Id = workspaceId,
+                    MentorId = mentorId,
+                    DeskCode = "D-100",
+                    Building = "HQ"
+                }
+            });
+            await seedCtx.SaveChangesAsync();
+        }
+
+        {
+            await using var ctx = CreateInMemoryContext(dbName);
+            var existing = await ctx.Mentors
+                .Include(m => m.Workspace)
+                .FirstAsync(m => m.Id == mentorId);
+
+            var updated = new Mentor
+            {
+                Id = mentorId,
+                DisplayName = "M1",
+                Status = "Active",
+                Workspace = new MentorWorkspace
+                {
+                    Id = workspaceId,
+                    MentorId = mentorId,
+                    DeskCode = "D-200",
+                    Building = "Annex"
+                }
+            };
+
+            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            await ctx.SaveChangesAsync();
+        }
+
+        {
+            await using var verifyCtx = CreateInMemoryContext(dbName);
+            var workspaces = await verifyCtx.Set<MentorWorkspace>().ToListAsync();
+            workspaces.Should().HaveCount(1);
+            workspaces[0].Id.Should().Be(workspaceId);
+            workspaces[0].DeskCode.Should().Be("D-200");
+            workspaces[0].Building.Should().Be("Annex");
+            workspaces[0].MentorId.Should().Be(mentorId);
+        }
+    }
+
+    [Fact]
+    public async Task Optional_one_to_one_add_when_missing_inserts_and_links_new_dependent()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var mentorId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        {
+            await using var seedCtx = CreateInMemoryContext(dbName);
+            seedCtx.Mentors.Add(new Mentor
+            {
+                Id = mentorId,
+                DisplayName = "M1",
+                Status = "Active"
+            });
+            await seedCtx.SaveChangesAsync();
+        }
+
+        {
+            await using var ctx = CreateInMemoryContext(dbName);
+            var existing = await ctx.Mentors
+                .Include(m => m.Workspace)
+                .FirstAsync(m => m.Id == mentorId);
+
+            var updated = new Mentor
+            {
+                Id = mentorId,
+                DisplayName = "M1",
+                Status = "Active",
+                Workspace = new MentorWorkspace
+                {
+                    Id = workspaceId,
+                    MentorId = mentorId,
+                    DeskCode = "D-300",
+                    Building = "West"
+                }
+            };
+
+            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            await ctx.SaveChangesAsync();
+        }
+
+        {
+            await using var verifyCtx = CreateInMemoryContext(dbName);
+            var mentor = await verifyCtx.Mentors
+                .Include(m => m.Workspace)
+                .FirstAsync(m => m.Id == mentorId);
+
+            mentor.Workspace.Should().NotBeNull();
+            mentor.Workspace!.Id.Should().Be(workspaceId);
+            mentor.Workspace.MentorId.Should().Be(mentorId);
+            mentor.Workspace.DeskCode.Should().Be("D-300");
+        }
+    }
+
+    [Fact]
+    public async Task Optional_one_to_one_replace_detaches_old_and_links_new_dependent()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var mentorId = Guid.NewGuid();
+        var oldWorkspaceId = Guid.NewGuid();
+        var newWorkspaceId = Guid.NewGuid();
+
+        {
+            await using var seedCtx = CreateInMemoryContext(dbName);
+            seedCtx.Mentors.Add(new Mentor
+            {
+                Id = mentorId,
+                DisplayName = "M1",
+                Status = "Active",
+                Workspace = new MentorWorkspace
+                {
+                    Id = oldWorkspaceId,
+                    MentorId = mentorId,
+                    DeskCode = "D-100",
+                    Building = "HQ"
+                }
+            });
+            await seedCtx.SaveChangesAsync();
+        }
+
+        {
+            await using var ctx = CreateInMemoryContext(dbName);
+            var existing = await ctx.Mentors
+                .Include(m => m.Workspace)
+                .FirstAsync(m => m.Id == mentorId);
+
+            var updated = new Mentor
+            {
+                Id = mentorId,
+                DisplayName = "M1",
+                Status = "Active",
+                Workspace = new MentorWorkspace
+                {
+                    Id = newWorkspaceId,
+                    MentorId = mentorId,
+                    DeskCode = "D-999",
+                    Building = "Tower"
+                }
+            };
+
+            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            await ctx.SaveChangesAsync();
+        }
+
+        {
+            await using var verifyCtx = CreateInMemoryContext(dbName);
+            var mentor = await verifyCtx.Mentors
+                .Include(m => m.Workspace)
+                .FirstAsync(m => m.Id == mentorId);
+            mentor.Workspace.Should().NotBeNull();
+            mentor.Workspace!.Id.Should().Be(newWorkspaceId);
+            mentor.Workspace.MentorId.Should().Be(mentorId);
+
+            var oldWorkspace = await verifyCtx.Set<MentorWorkspace>()
+                .FirstAsync(w => w.Id == oldWorkspaceId);
+            oldWorkspace.MentorId.Should().BeNull();
+
+            var allWorkspaces = await verifyCtx.Set<MentorWorkspace>().ToListAsync();
+            allWorkspaces.Should().HaveCount(2);
+        }
+    }
+
+    [Fact]
     public async Task Update_required_dependent_properties()
     {
         // Arrange

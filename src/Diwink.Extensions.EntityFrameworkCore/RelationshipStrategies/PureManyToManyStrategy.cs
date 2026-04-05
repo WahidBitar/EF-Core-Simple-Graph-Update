@@ -1,3 +1,4 @@
+using System.Collections;
 using Diwink.Extensions.EntityFrameworkCore.GraphUpdate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -50,12 +51,8 @@ internal static class PureManyToManyStrategy
                 var pk = entityType?.FindPrimaryKey();
                 if (pk is not null)
                 {
-                    var keyValues = pk.Properties
-                        .Select(p => p.PropertyInfo!.GetValue(updatedItem)!)
-                        .ToArray();
-
                     // Find checks tracker first, then queries store
-                    var knownEntity = context.Find(entityType!.ClrType, keyValues);
+                    var knownEntity = context.Find(entityType!.ClrType, updatedKeys);
 
                     if (knownEntity is not null)
                     {
@@ -94,13 +91,51 @@ internal static class PureManyToManyStrategy
 
     private static void RemoveFromCollection(CollectionEntry navigation, object item)
     {
-        var removeMethod = navigation.CurrentValue!.GetType().GetMethod("Remove");
-        removeMethod?.Invoke(navigation.CurrentValue, [item]);
+        ExecuteCollectionOperation(navigation, item, "remove", static (list, value) =>
+        {
+            list.Remove(value);
+        });
     }
 
     private static void AddToCollection(CollectionEntry navigation, object item)
     {
-        var addMethod = navigation.CurrentValue!.GetType().GetMethod("Add");
-        addMethod?.Invoke(navigation.CurrentValue, [item]);
+        ExecuteCollectionOperation(navigation, item, "add", static (list, value) =>
+        {
+            list.Add(value);
+        });
+    }
+
+    private static void ExecuteCollectionOperation(
+        CollectionEntry navigation,
+        object item,
+        string operation,
+        Action<IList, object> listOperation)
+    {
+        var currentValue = navigation.CurrentValue ?? throw new InvalidOperationException(
+            $"Collection navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' has null CurrentValue; cannot {operation} item '{item}'.");
+
+        if (currentValue is IList list)
+        {
+            listOperation(list, item);
+            return;
+        }
+
+        var collectionInterface = currentValue.GetType().GetInterfaces()
+            .FirstOrDefault(i =>
+                i.IsGenericType &&
+                i.GetGenericTypeDefinition() == typeof(ICollection<>) &&
+                i.GenericTypeArguments[0].IsAssignableFrom(item.GetType()));
+
+        if (collectionInterface is null)
+        {
+            throw new InvalidOperationException(
+                $"Collection navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' with current value type '{currentValue.GetType().FullName}' does not support {operation} for item type '{item.GetType().FullName}'.");
+        }
+
+        var methodName = operation == "add" ? nameof(ICollection<object>.Add) : nameof(ICollection<object>.Remove);
+        var method = collectionInterface.GetMethod(methodName) ?? throw new InvalidOperationException(
+            $"Collection interface '{collectionInterface.FullName}' for navigation '{navigation.Metadata.DeclaringEntityType.ClrType.Name}.{navigation.Metadata.Name}' does not expose '{methodName}'.");
+
+        method.Invoke(currentValue, [item]);
     }
 }

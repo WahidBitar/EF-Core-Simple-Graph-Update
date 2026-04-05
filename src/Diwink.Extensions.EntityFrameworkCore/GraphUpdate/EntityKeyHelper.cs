@@ -14,8 +14,13 @@ internal static class EntityKeyHelper
     /// </summary>
     public static object[] GetKeyValues(EntityEntry entry)
     {
-        var keyProperties = entry.Metadata.FindPrimaryKey()!.Properties;
-        return keyProperties.Select(p => entry.Property(p.Name).CurrentValue!).ToArray();
+        var primaryKey = entry.Metadata.FindPrimaryKey()
+            ?? throw new InvalidOperationException(
+                $"Entity '{entry.Metadata.ClrType.Name}' does not define a primary key.");
+
+        return primaryKey.Properties
+            .Select(p => GetRequiredTrackedKeyValue(entry, p))
+            .ToArray();
     }
 
     /// <summary>
@@ -27,9 +32,12 @@ internal static class EntityKeyHelper
         if (entityType is null)
             return [];
 
-        var keyProperties = entityType.FindPrimaryKey()!.Properties;
-        return keyProperties.Select(p => entityType.FindProperty(p.Name)!)
-            .Select(p => p.PropertyInfo!.GetValue(entity)!)
+        var primaryKey = entityType.FindPrimaryKey();
+        if (primaryKey is null)
+            return [];
+
+        return primaryKey.Properties
+            .Select(p => GetRequiredDetachedKeyValue(entityType, p, entity))
             .ToArray();
     }
 
@@ -56,5 +64,31 @@ internal static class EntityKeyHelper
                 return item;
         }
         return null;
+    }
+
+    internal static object? ReadDetachedPropertyValue(IProperty property, object entity)
+    {
+        if (property.PropertyInfo is not null)
+            return property.PropertyInfo.GetValue(entity);
+
+        if (property.FieldInfo is not null)
+            return property.FieldInfo.GetValue(entity);
+
+        throw new InvalidOperationException(
+            $"Property '{property.Name}' on entity '{entity.GetType().Name}' does not expose a CLR property or field.");
+    }
+
+    private static object GetRequiredTrackedKeyValue(EntityEntry entry, IProperty property)
+    {
+        var value = entry.Property(property.Name).CurrentValue;
+        return value ?? throw new InvalidOperationException(
+            $"Primary key component '{property.Name}' on tracked entity '{entry.Metadata.ClrType.Name}' is null.");
+    }
+
+    private static object GetRequiredDetachedKeyValue(IEntityType entityType, IProperty property, object entity)
+    {
+        var value = ReadDetachedPropertyValue(property, entity);
+        return value ?? throw new InvalidOperationException(
+            $"Primary key component '{property.Name}' on detached entity '{entityType.ClrType.Name}' is null.");
     }
 }
