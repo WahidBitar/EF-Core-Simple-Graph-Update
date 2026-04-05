@@ -196,6 +196,66 @@ public class ManyToManyDiffStrategyTests
     }
 
     [Fact]
+    public async Task Already_linked_related_entity_does_not_clobber_modified_tracked_state()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var catalogId = Guid.NewGuid();
+        var courseId = Guid.NewGuid();
+        var tagId = Guid.NewGuid();
+
+        {
+            await using var seedCtx = CreateInMemoryContext(dbName);
+            var tag = new TopicTag { Id = tagId, Label = "Persisted" };
+            seedCtx.LearningCatalogs.Add(new LearningCatalog { Id = catalogId, Name = "Catalog" });
+            seedCtx.Courses.Add(new Course
+            {
+                Id = courseId,
+                CatalogId = catalogId,
+                Title = "Test",
+                Code = "T-001",
+                Tags = [tag]
+            });
+            await seedCtx.SaveChangesAsync();
+        }
+
+        {
+            await using var ctx = CreateInMemoryContext(dbName);
+            var existing = await ctx.Courses
+                .Include(c => c.Tags)
+                .FirstAsync(c => c.Id == courseId);
+
+            existing.Tags.Should().ContainSingle(t => t.Id == tagId);
+
+            var trackedTag = existing.Tags.Single(t => t.Id == tagId);
+            trackedTag.Label = "Locally Modified";
+            ctx.ChangeTracker.DetectChanges();
+            ctx.Entry(trackedTag).State.Should().Be(EntityState.Modified);
+
+            var updated = new Course
+            {
+                Id = courseId,
+                CatalogId = catalogId,
+                Title = "Test",
+                Code = "T-001",
+                Tags = [new TopicTag { Id = tagId, Label = "Detached Copy" }]
+            };
+
+            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            await ctx.SaveChangesAsync();
+        }
+
+        {
+            await using var verifyCtx = CreateInMemoryContext(dbName);
+            var result = await verifyCtx.Courses
+                .Include(c => c.Tags)
+                .FirstAsync(c => c.Id == courseId);
+
+            result.Tags.Should().ContainSingle(t => t.Id == tagId);
+            result.Tags.Single().Label.Should().Be("Locally Modified");
+        }
+    }
+
+    [Fact]
     public async Task Detects_added_payload_association_entities()
     {
         // Arrange

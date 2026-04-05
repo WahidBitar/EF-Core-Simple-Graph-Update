@@ -42,7 +42,7 @@ internal static class PureManyToManyStrategy
             if (existingMatch is not null)
             {
                 // Update existing related entity properties
-                context.Entry(existingMatch).CurrentValues.SetValues(updatedItem);
+                ApplyValuesIfNotModified(context, existingMatch, updatedItem);
             }
             else
             {
@@ -57,12 +57,7 @@ internal static class PureManyToManyStrategy
                     if (knownEntity is not null)
                     {
                         // Entity exists — update properties and create link
-                        var knownEntityEntry = context.Entry(knownEntity);
-                        if (knownEntityEntry.State is EntityState.Unchanged or EntityState.Detached)
-                        {
-                            knownEntityEntry.CurrentValues.SetValues(updatedItem);
-                        }
-
+                        ApplyValuesIfNotModified(context, knownEntity, updatedItem);
                         AddToCollection(existingNavigation, knownEntity);
                     }
                     else
@@ -77,6 +72,15 @@ internal static class PureManyToManyStrategy
                     AddToCollection(existingNavigation, updatedItem);
                 }
             }
+        }
+    }
+
+    private static void ApplyValuesIfNotModified(DbContext context, object trackedEntity, object updatedEntity)
+    {
+        var trackedEntry = context.Entry(trackedEntity);
+        if (trackedEntry.State is EntityState.Unchanged or EntityState.Detached)
+        {
+            trackedEntry.CurrentValues.SetValues(updatedEntity);
         }
     }
 
