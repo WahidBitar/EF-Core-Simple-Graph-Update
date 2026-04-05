@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>Diwink.Extensions.EntityFrameworkCore</PackageId>
-    <Version>10.0.0</Version>
+    <Version>10.0.1</Version>
     <Authors>Wahid Bitar</Authors>
     <Company>Digital Wink</Company>
     <Description>Simple graph update extension for Entity Framework Core 9.x and 10.x on .NET 8.x through 10.x</Description>
