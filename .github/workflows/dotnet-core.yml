@@ -1,28 +1,66 @@
-name: .NET Core CI
+name: .NET CI
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
   pull_request:
-    branches: [master]
+    branches:
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Build and test
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "10.0.x"
-      - name: Install dependencies
-        run: dotnet restore
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore src/EFCore.UpdateGraph.slnx
+
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build src/EFCore.UpdateGraph.slnx --configuration Release --no-restore
+
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
-      - name: Publish SimpleGraph Update
-        uses: brandedoutcast/publish-nuget@v2.5.2
+        run: dotnet test src/EFCore.UpdateGraph.slnx --configuration Release --no-build --verbosity normal
+
+  publish:
+    name: Publish NuGet package
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
         with:
-          PROJECT_FILE_PATH: src/Diwink.Extensions.EntityFrameworkCore/Diwink.Extensions.EntityFrameworkCore.csproj
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          dotnet-version: 10.0.x
+
+      - name: Restore package project
+        run: dotnet restore src/Diwink.Extensions.EntityFrameworkCore/Diwink.Extensions.EntityFrameworkCore.csproj
+
+      - name: Pack
+        run: dotnet pack src/Diwink.Extensions.EntityFrameworkCore/Diwink.Extensions.EntityFrameworkCore.csproj --configuration Release --no-restore --output ./artifacts
+
+      - name: Skip publish when NUGET_API_KEY is not configured
+        if: env.NUGET_API_KEY == ''
+        run: echo "NUGET_API_KEY is not configured. Skipping package publish."
+
+      - name: Publish to NuGet.org
+        if: env.NUGET_API_KEY != ''
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
