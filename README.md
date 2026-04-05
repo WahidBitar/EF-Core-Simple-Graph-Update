@@ -1,6 +1,6 @@
 # Digital Wink Entity Framework Extensions
-In this simple project we're going to expose the helper extenasion methods that we're using in our company.
-and as a starting point we'll start witht the Graph update method.
+In this simple project we're going to expose the helper extension methods that we're using in our company.
+and as a starting point we'll start with the Graph update method.
 We'll update the [Nuget Package](https://www.nuget.org/packages/Diwink.Extensions.EntityFrameworkCore/) whenever we have a new version.
 
 ## Entity Framework Core Simple Graph Update
@@ -9,24 +9,12 @@ It's a simple update method that will help you to do a full update to an aggrega
 the update method will take the loaded aggregate entity from the DB and the passed one that may come from the API layer.
 Internally the method will update just the eager loaded entities in the aggregate "The included entities"
 
-```csharp
-var updatedSchool = mapper.Map<School>(apiModel);
 
-var dbSchool = dbContext.Schools
-    .Include(s => s.Classes)
-    .ThenInclude(s => s.Students)
-    .FirstOrDefault();
+## Support (.NET 8-10, EF Core 9-10)
 
-dbContext.InsertUpdateOrDeleteGraph(updatedSchool, dbSchool);
-
-dbContext.SaveChanges();
-
-```
-
-## v2 Rebuild (EF Core 10+)
-
-The v2 rebuild (`src/`) targets .NET 10 and EF Core 10.x with explicit,
-contract-driven relationship semantics.
+The project was rebuilt to ships new `net10.x.x` assets, so the package
+supports .NET 8.x through .NET 10.x and EF Core 9.x through 10.x while keeping
+the same explicit, contract-driven relationship semantics.
 
 ### Supported Relationship Patterns
 
@@ -46,7 +34,7 @@ contract-driven relationship semantics.
 | Mixed supported + unsupported mutations | `PartialMutationNotAllowedException` |
 | Unsupported relationship unchanged | Silently skipped |
 
-### v2 Usage
+### Usage
 
 ```csharp
 var updated = BuildDesiredState(); // detached graph
