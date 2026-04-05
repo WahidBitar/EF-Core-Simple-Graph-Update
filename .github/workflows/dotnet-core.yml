@@ -31,8 +31,11 @@ jobs:
       - name: Build
         run: dotnet build src/EFCore.UpdateGraph.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test src/EFCore.UpdateGraph.slnx --configuration Release --no-build --verbosity normal
+      - name: Test unit project
+        run: dotnet test src/Diwink.Extensions.EntityFrameworkCore.Tests.Unit/Diwink.Extensions.EntityFrameworkCore.Tests.Unit.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test integration project
+        run: dotnet test src/Diwink.Extensions.EntityFrameworkCore.Tests.Integration/Diwink.Extensions.EntityFrameworkCore.Tests.Integration.csproj --configuration Release --no-build --verbosity normal
 
   publish:
     name: Publish NuGet package

@@ -33,7 +33,7 @@ public static class DbContextExtensions
     /// <param name="existingEntity">The already-tracked entity graph to be updated to match <paramref name="updatedEntity"/>.</param>
     /// <returns>The updated tracked entity.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="context"/>, <paramref name="updatedEntity"/>, or <paramref name="existingEntity"/> is null.</exception>
-    public static T InsertUpdateOrDeleteGraph<T>(
+    public static T UpdateGraph<T>(
         this DbContext context,
         T updatedEntity,
         T existingEntity)

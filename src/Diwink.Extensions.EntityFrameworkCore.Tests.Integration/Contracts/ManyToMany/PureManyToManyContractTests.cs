@@ -43,7 +43,7 @@ public class PureManyToManyContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -82,7 +82,7 @@ public class PureManyToManyContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -127,7 +127,7 @@ public class PureManyToManyContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -168,7 +168,7 @@ public class PureManyToManyContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert

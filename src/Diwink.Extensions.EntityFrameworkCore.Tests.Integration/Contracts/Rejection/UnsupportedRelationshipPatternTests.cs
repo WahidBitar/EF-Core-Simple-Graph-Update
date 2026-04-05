@@ -46,7 +46,7 @@ public class UnsupportedRelationshipPatternTests : IntegrationTestBase
         };
 
         // Act — should NOT throw because one-to-many is unchanged
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert — scalar update applied, courses unchanged
@@ -99,7 +99,7 @@ public class UnsupportedRelationshipPatternTests : IntegrationTestBase
         };
 
         // Act & Assert — should throw because one-to-many has mutations
-        var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        var act = () => ctx.UpdateGraph(updated, existing);
         act.Should().Throw<UnsupportedNavigationMutatedException>()
             .Which.RelationshipType.Should().Be("OneToMany");
     }
@@ -131,7 +131,7 @@ public class UnsupportedRelationshipPatternTests : IntegrationTestBase
         };
 
         // Act & Assert
-        var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        var act = () => ctx.UpdateGraph(updated, existing);
         act.Should().Throw<UnsupportedNavigationMutatedException>();
     }
 
@@ -156,7 +156,7 @@ public class UnsupportedRelationshipPatternTests : IntegrationTestBase
             }).ToList()
         };
 
-        var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        var act = () => ctx.UpdateGraph(updated, existing);
 
         act.Should().Throw<UnsupportedNavigationMutatedException>()
             .Which.RelationshipPath.Should().Be("LearningCatalog.Courses");

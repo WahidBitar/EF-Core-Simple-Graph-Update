@@ -68,7 +68,7 @@ public class PartialMutationNotAllowedTests : IntegrationTestBase
         };
 
         // Act & Assert — entire operation rejected
-        var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        var act = () => ctx.UpdateGraph(updated, existing);
         act.Should().Throw<GraphUpdateException>();
 
         // Verify no mutations were applied (all-or-nothing)

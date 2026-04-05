@@ -77,7 +77,7 @@ public class NestedNavigationValidationTests
                 }
             };
 
-            var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            var act = () => ctx.UpdateGraph(updated, existing);
 
             act.Should().Throw<UnsupportedNavigationMutatedException>()
                 .Which.RelationshipPath.Should().Be("RecursiveChild.Items");
@@ -139,7 +139,7 @@ public class NestedNavigationValidationTests
                 }
             };
 
-            var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            var act = () => ctx.UpdateGraph(updated, existing);
 
             act.Should().Throw<UnloadedNavigationMutationException>()
                 .Which.NavigationName.Should().Be("Metadata");
@@ -197,7 +197,7 @@ public class NestedNavigationValidationTests
                 }
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
@@ -271,7 +271,7 @@ public class NestedNavigationValidationTests
                 }
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 

@@ -39,7 +39,7 @@ public class ManyToManySafetyContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -76,7 +76,7 @@ public class ManyToManySafetyContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert

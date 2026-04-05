@@ -8,7 +8,7 @@ namespace Diwink.Extensions.EntityFrameworkCore.Tests.Integration.Infrastructure
 /// </summary>
 public class SqlServerContainerFixture : IAsyncLifetime
 {
-    internal const string DefaultSqlServerImage = "mcr.microsoft.com/mssql/server:2022-CU10-ubuntu-20.04";
+    internal const string DefaultSqlServerImage = "mcr.microsoft.com/mssql/server:2022-latest";
 
     private readonly MsSqlContainer _container = new MsSqlBuilder(GetSqlServerImage())
         .Build();

@@ -1,6 +1,7 @@
 using Diwink.Extensions.EntityFrameworkCore.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Linq;
 
 namespace Diwink.Extensions.EntityFrameworkCore.Traversal;
 

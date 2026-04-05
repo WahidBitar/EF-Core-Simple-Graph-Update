@@ -67,7 +67,7 @@ public class UnsupportedRelationshipPatternTests
                 ]
             };
 
-            var act = () => ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            var act = () => ctx.UpdateGraph(updated, existing);
 
             act.Should().Throw<UnsupportedNavigationMutatedException>()
                 .Which.RelationshipPath.Should().Be("LearningCatalog.Courses");

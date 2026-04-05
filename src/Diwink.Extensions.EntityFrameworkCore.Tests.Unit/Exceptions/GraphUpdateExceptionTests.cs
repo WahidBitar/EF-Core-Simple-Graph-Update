@@ -220,12 +220,21 @@ public class GraphUpdateExceptionTests
     }
 
     [Fact]
-    public void UnsupportedNavigationMutatedException_with_empty_strings_stores_them_as_is()
+    public void UnsupportedNavigationMutatedException_rejects_empty_relationship_path()
     {
-        var ex = new UnsupportedNavigationMutatedException(string.Empty, string.Empty);
+        var act = () => new UnsupportedNavigationMutatedException(string.Empty, "OneToMany");
 
-        ex.RelationshipPath.Should().Be(string.Empty);
-        ex.RelationshipType.Should().Be(string.Empty);
+        act.Should().Throw<ArgumentException>()
+            .Which.ParamName.Should().Be("relationshipPath");
+    }
+
+    [Fact]
+    public void UnsupportedNavigationMutatedException_rejects_blank_relationship_type()
+    {
+        var act = () => new UnsupportedNavigationMutatedException("Course.Items", " ");
+
+        act.Should().Throw<ArgumentException>()
+            .Which.ParamName.Should().Be("relationshipType");
     }
 
     [Fact]

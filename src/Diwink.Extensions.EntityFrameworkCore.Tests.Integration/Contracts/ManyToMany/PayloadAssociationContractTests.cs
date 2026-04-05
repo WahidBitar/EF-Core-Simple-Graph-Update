@@ -56,7 +56,7 @@ public class PayloadAssociationContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -103,7 +103,7 @@ public class PayloadAssociationContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -138,7 +138,7 @@ public class PayloadAssociationContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert

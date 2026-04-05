@@ -43,7 +43,7 @@ public class OptionalOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert — workspace should still exist but with null MentorId
@@ -83,7 +83,7 @@ public class OptionalOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -121,7 +121,7 @@ public class OptionalOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -159,7 +159,7 @@ public class OptionalOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert — old workspace should be detached (FK nulled), new one linked

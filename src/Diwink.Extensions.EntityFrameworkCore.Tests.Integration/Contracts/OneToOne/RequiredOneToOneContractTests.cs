@@ -43,7 +43,7 @@ public class RequiredOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert — the CoursePolicy row should be deleted
@@ -82,7 +82,7 @@ public class RequiredOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert
@@ -130,7 +130,7 @@ public class RequiredOneToOneContractTests : IntegrationTestBase
         };
 
         // Act
-        ctx.InsertUpdateOrDeleteGraph(updated, existing);
+        ctx.UpdateGraph(updated, existing);
         await ctx.SaveChangesAsync();
 
         // Assert

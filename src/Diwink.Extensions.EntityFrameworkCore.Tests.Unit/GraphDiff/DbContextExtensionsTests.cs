@@ -22,7 +22,7 @@ public class DbContextExtensionsTests
         var updated = new Course { Id = Guid.NewGuid(), CatalogId = Guid.NewGuid(), Title = "Updated", Code = "UPD-1" };
         var existing = new Course { Id = updated.Id, CatalogId = updated.CatalogId, Title = "Existing", Code = "EX-1" };
 
-        var act = () => DbContextExtensions.InsertUpdateOrDeleteGraph<Course>(null!, updated, existing);
+        var act = () => DbContextExtensions.UpdateGraph<Course>(null!, updated, existing);
 
         act.Should().Throw<ArgumentNullException>()
             .Which.ParamName.Should().Be("context");
@@ -34,7 +34,7 @@ public class DbContextExtensionsTests
         using var context = CreateInMemoryContext();
         var existing = new Course { Id = Guid.NewGuid(), CatalogId = Guid.NewGuid(), Title = "Existing", Code = "EX-1" };
 
-        var act = () => context.InsertUpdateOrDeleteGraph<Course>(null!, existing);
+        var act = () => context.UpdateGraph<Course>(null!, existing);
 
         act.Should().Throw<ArgumentNullException>()
             .Which.ParamName.Should().Be("updatedEntity");
@@ -46,7 +46,7 @@ public class DbContextExtensionsTests
         using var context = CreateInMemoryContext();
         var updated = new Course { Id = Guid.NewGuid(), CatalogId = Guid.NewGuid(), Title = "Updated", Code = "UPD-1" };
 
-        var act = () => context.InsertUpdateOrDeleteGraph(updated, null!);
+        var act = () => context.UpdateGraph(updated, null!);
 
         act.Should().Throw<ArgumentNullException>()
             .Which.ParamName.Should().Be("existingEntity");

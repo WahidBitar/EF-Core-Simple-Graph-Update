@@ -38,7 +38,7 @@ internal static class GraphUpdateOrchestrator
         guard.ThrowIfErrors();
 
         // Phase 2: Apply — update scalar properties then process navigations
-        RelatedEntityMutationService.UpdateScalarProperties(existingEntry, updatedEntity);
+        existingEntry.CurrentValues.SetValues(updatedEntity);
         ApplyNavigations(context, existingEntry, updatedEntity, aggregateType);
 
         return existingEntity;
@@ -252,8 +252,8 @@ internal static class GraphUpdateOrchestrator
 
             // Update existing reference — scalars + nested navigations
             var childEntry = context.Entry(existingValue);
-            RelatedEntityMutationService.UpdateScalarProperties(childEntry, updatedValue);
-            RelatedEntityMutationService.ProcessNavigations(context, childEntry, updatedValue, aggregateType);
+            childEntry.CurrentValues.SetValues(updatedValue);
+            ApplyNavigations(context, childEntry, updatedValue, aggregateType);
         }
         else if (updatedValue is not null && existingValue is null)
         {

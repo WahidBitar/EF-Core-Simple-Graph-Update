@@ -65,7 +65,7 @@ public class OneToOneOwnershipResolverTests
                 Policy = null
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
@@ -126,7 +126,7 @@ public class OneToOneOwnershipResolverTests
                 Workspace = null
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
@@ -190,7 +190,7 @@ public class OneToOneOwnershipResolverTests
                 }
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
@@ -243,7 +243,7 @@ public class OneToOneOwnershipResolverTests
                 }
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
@@ -306,7 +306,7 @@ public class OneToOneOwnershipResolverTests
                 }
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
@@ -378,7 +378,7 @@ public class OneToOneOwnershipResolverTests
                 }
             };
 
-            ctx.InsertUpdateOrDeleteGraph(updated, existing);
+            ctx.UpdateGraph(updated, existing);
             await ctx.SaveChangesAsync();
         }
 
