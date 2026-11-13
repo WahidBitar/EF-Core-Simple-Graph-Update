@@ -5,10 +5,10 @@
     <Nullable>enable</Nullable>
 
     <PackageId>Diwink.Extensions.EntityFrameworkCore</PackageId>
-    <Version>10.1.1</Version>
+    <Version>11.0.0</Version>
     <Authors>Wahid Bitar</Authors>
     <Company>Digital Wink</Company>
-    <Description>Simple graph update extension for Entity Framework Core 9.x and 10.x on .NET 8.x through 10.x</Description>
+    <Description>Simple graph update extension for Entity Framework Core 9.x, 10.x, and 11.x on .NET 8.x through to 11.x</Description>
     <RepositoryUrl>https://github.com/WahidBitar/EF-Core-Simple-Graph-Update.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -34,6 +34,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore10Version)" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore11Version)" />
+  </ItemGroup>
+  
   <ItemGroup>
     <InternalsVisibleTo Include="Diwink.Extensions.EntityFrameworkCore.Tests.Unit" />
     <InternalsVisibleTo Include="Diwink.Extensions.EntityFrameworkCore.Tests.Integration" />

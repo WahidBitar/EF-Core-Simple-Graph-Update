@@ -6,12 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A NuGet package (`Diwink.Extensions.EntityFrameworkCore`) that provides a single `DbContext.UpdateGraph()` extension method for EF Core. It diffs a detached entity graph against a tracked one and applies mutations using relationship-specific strategies, then the caller calls `SaveChangesAsync()`.
 
-Published to NuGet as `Diwink.Extensions.EntityFrameworkCore` (current version 10.0.1).
+Published to NuGet as `Diwink.Extensions.EntityFrameworkCore` (current version 11.0.0).
 
 ## Commands
 
 ```bash
-# Build (multi-TFM: net8.0, net9.0, net10.0)
+# Build (multi-TFM: net8.0, net9.0, net10.0, net11.0)
 dotnet build src/EFCore.UpdateGraph.slnx
 
 # Run all tests (unit + integration)
@@ -94,6 +94,7 @@ Entity configurations are in `TestModel/Configurations/` using `IEntityTypeConfi
 `Directory.Build.props` defines shared TFMs and version ranges:
 - `net8.0` / `net9.0` → EF Core 9.x (`[9.0.14,10.0.0)`)
 - `net10.0` → EF Core 10.x (`[10.0.5,11.0.0)`)
+- `net11.0` → EF Core 11.x (`[11.0.0,12.0.0)`)
 
 The library project uses `InternalsVisibleTo` for both test projects.
 

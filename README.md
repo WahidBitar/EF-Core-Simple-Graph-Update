@@ -22,7 +22,7 @@ EF Core tracks individual entities well, but updating a full aggregate graph (ro
 dotnet add package Diwink.Extensions.EntityFrameworkCore
 ```
 
-**Supported platforms:** .NET 8, .NET 9, .NET 10 with EF Core 9.x or 10.x
+**Supported platforms:** .NET 8, .NET 9, .NET 10, and .NET 11 with EF Core 9.x, 10.x, or 11.x
 
 ## Quick Start
 
@@ -175,8 +175,8 @@ Removal behavior depends on the FK constraint:
 
 ## Requirements
 
-- **.NET 8.0**, **.NET 9.0**, or **.NET 10.0**
-- **EF Core 9.x** (net8.0/net9.0) or **EF Core 10.x** (net10.0)
+- **.NET 8.0**, **.NET 9.0**, **.NET 10.0**, or **.NET 11.0**
+- **EF Core 9.x** (net8.0/net9.0), **EF Core 10.x** (net10.0), or **EF Core 11.x** (net11.0)
 - No additional dependencies beyond `Microsoft.EntityFrameworkCore`
 
 
